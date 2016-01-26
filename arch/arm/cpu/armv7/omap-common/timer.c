@@ -32,7 +32,8 @@ static struct gptimer *timer_base = (struct gptimer *)CONFIG_SYS_TIMERBASE;
 #define TIMER_CLOCK		(V_SCLK / (2 << CONFIG_SYS_PTV))
 #define TIMER_OVERFLOW_VAL	0xffffffff
 #define TIMER_LOAD_VAL		0
-
+#define ___SKIP_timer_init_spl_FUNC
+#define ___SKIP_timer_init_main_FUNC
 int timer_init(void)
 {
 	/* start the counter ticking up, reload value on overflow */
@@ -49,15 +50,18 @@ int timer_init(void)
  */
 ulong get_timer(ulong base)
 {
+
 	return get_timer_masked() - base;
 }
 
 /* delay x useconds */
+#define ___SKIP___udelay_spl_FUNC
+#define ___SKIP___udelay_main_FUNC
 void __udelay(unsigned long usec)
 {
 	long tmo = usec * (TIMER_CLOCK / 1000) / 1000;
 	unsigned long now, last = readl(&timer_base->tcrr);
-
+	//@ loop pragma UNROLL 0;
 	while (tmo > 0) {
 		now = readl(&timer_base->tcrr);
 		if (last > now) /* count up timer overflow */

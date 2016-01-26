@@ -5,7 +5,6 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
-
 #include <common.h>
 #include <command.h>
 #include <config.h>
@@ -97,7 +96,6 @@ static void set_name(dir_entry *dirent, const char *filename)
 			dirent->ext[i] = ' ';
 	} else
 		memcpy(dirent->ext, s_name + period_location + 1, 3);
-
 	debug("name : %s\n", dirent->name);
 	debug("ext : %s\n", dirent->ext);
 }
@@ -171,7 +169,6 @@ static __u32 get_fatent_value(fsdata *mydata, __u32 entry)
 		/* Unsupported FAT size */
 		return ret;
 	}
-
 	debug("FAT%d: entry: 0x%04x = %d, offset: 0x%04x = %d\n",
 	       mydata->fatsize, entry, entry, offset, offset);
 
@@ -564,12 +561,11 @@ set_cluster(fsdata *mydata, __u32 clustnum, __u8 *buffer,
 				clustnum * mydata->clust_size;
 	else
 		startsect = mydata->rootdir_sect;
-
 	debug("clustnum: %d, startsect: %d\n", clustnum, startsect);
 
 	if ((unsigned long)buffer & (ARCH_DMA_MINALIGN - 1)) {
+#define ___FRAMAC_align_buffer_spl_PATCH
 		ALLOC_CACHE_ALIGN_BUFFER(__u8, tmpbuf, mydata->sect_size);
-
 		printf("FAT: Misaligned buffer address (%p)\n", buffer);
 
 		while (size >= mydata->sect_size) {
@@ -598,6 +594,7 @@ set_cluster(fsdata *mydata, __u32 clustnum, __u8 *buffer,
 	}
 
 	if (size) {
+#define ___FRAMAC_align_buffer_spl_PATCH
 		ALLOC_CACHE_ALIGN_BUFFER(__u8, tmpbuf, mydata->sect_size);
 
 		memcpy(tmpbuf, buffer, size);
@@ -707,7 +704,6 @@ set_contents(fsdata *mydata, dir_entry *dentptr, __u8 *buffer,
 
 	if (maxsize > 0 && filesize > maxsize)
 		filesize = maxsize;
-
 	debug("%llu bytes\n", filesize);
 
 	if (!curclust) {
@@ -849,7 +845,6 @@ static dir_entry *find_directory_entry(fsdata *mydata, int startsect,
 	char *filename, dir_entry *retdent, __u32 start)
 {
 	__u32 curclust = (startsect - mydata->data_begin) / mydata->clust_size;
-
 	debug("get_dentfromdir: %s\n", filename);
 
 	while (1) {
@@ -912,7 +907,6 @@ static dir_entry *find_directory_entry(fsdata *mydata, int startsect,
 			}
 
 			memcpy(retdent, dentptr, sizeof(dir_entry));
-
 			debug("DentName: %s", s_name);
 			debug(", start: 0x%x", START(dentptr));
 			debug(", size:  0x%x %s\n",
@@ -1140,7 +1134,6 @@ int file_fat_write(const char *filename, void *buffer, loff_t offset,
 		printf("Error: non zero offset is currently not suported.\n");
 		return -1;
 	}
-
 	printf("writing %s\n", filename);
 	return do_fat_write(filename, buffer, maxsize, actwrite);
 }

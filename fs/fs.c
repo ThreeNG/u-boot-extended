@@ -27,7 +27,7 @@
 #include <asm/io.h>
 #include <div64.h>
 #include <linux/math64.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static block_dev_desc_t *fs_dev_desc;

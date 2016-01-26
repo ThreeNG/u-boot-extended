@@ -22,7 +22,7 @@
 #include <common.h>
 #include <asm/proc-armv/ptrace.h>
 #include <asm/u-boot-arm.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_USE_IRQ

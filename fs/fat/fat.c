@@ -8,7 +8,6 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
-
 #include <common.h>
 #include <config.h>
 #include <exports.h>
@@ -32,6 +31,7 @@ static const int vfat_enabled = 0;
 static void downcase(char *str)
 {
 	while (*str != '\0') {
+	  //@ assert ((int) (*str) + 32 <= 2147483647) && ((int) (*str) + 32 >= -2147483648);
 		*str = tolower(*str);
 		str++;
 	}
@@ -50,6 +50,7 @@ static int disk_read(__u32 block, __u32 nr_blocks, void *buf)
 
 	if (!cur_dev || !cur_dev->block_read)
 		return -1;
+	//@ assert \initialized(&cur_part_info.start);
 
 	ret = cur_dev->block_read(cur_dev->dev,
 				  cur_part_info.start + block, nr_blocks, buf);
@@ -62,6 +63,7 @@ static int disk_read(__u32 block, __u32 nr_blocks, void *buf)
 
 int fat_set_blk_dev(block_dev_desc_t *dev_desc, disk_partition_t *info)
 {
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
 
 	cur_dev = dev_desc;
@@ -191,7 +193,6 @@ static __u32 get_fatent(fsdata *mydata, __u32 entry)
 		/* Unsupported FAT size */
 		return ret;
 	}
-
 	debug("FAT%d: entry: 0x%04x = %d, offset: 0x%04x = %d\n",
 	       mydata->fatsize, entry, entry, offset, offset);
 
@@ -252,7 +253,7 @@ static __u32 get_fatent(fsdata *mydata, __u32 entry)
 			break;
 		}
 		break;
-	}
+	}	
 	debug("FAT%d: ret: %08x, offset: %04x\n",
 	       mydata->fatsize, ret, offset);
 
@@ -276,12 +277,11 @@ get_cluster(fsdata *mydata, __u32 clustnum, __u8 *buffer, unsigned long size)
 	} else {
 		startsect = mydata->rootdir_sect;
 	}
-
 	debug("gc - clustnum: %d, startsect: %d\n", clustnum, startsect);
 
 	if ((unsigned long)buffer & (ARCH_DMA_MINALIGN - 1)) {
+#define ___FRAMAC_align_buffer_spl_PATCH
 		ALLOC_CACHE_ALIGN_BUFFER(__u8, tmpbuf, mydata->sect_size);
-
 		printf("FAT: Misaligned buffer address (%p)\n", buffer);
 
 		while (size >= mydata->sect_size) {
@@ -308,6 +308,7 @@ get_cluster(fsdata *mydata, __u32 clustnum, __u8 *buffer, unsigned long size)
 		size -= idx;
 	}
 	if (size) {
+#define ___FRAMAC_align_buffer_spl_PATCH
 		ALLOC_CACHE_ALIGN_BUFFER(__u8, tmpbuf, mydata->sect_size);
 
 		ret = disk_read(startsect, 1, tmpbuf);
@@ -349,7 +350,6 @@ static int get_contents(fsdata *mydata, dir_entry *dentptr, loff_t pos,
 
 	if (maxsize > 0 && filesize > pos + maxsize)
 		filesize = pos + maxsize;
-
 	debug("%llu bytes\n", filesize);
 
 	actsize = bytesperclust;
@@ -561,6 +561,9 @@ get_vfatname(fsdata *mydata, int curclust, __u8 *cluster,
 }
 
 /* Calculate short name checksum */
+//@ ghost u8 ck;
+/*@ assigns \result \from ck;
+  @*/
 static __u8 mkcksum(const char name[8], const char ext[3])
 {
 	int i;
@@ -589,7 +592,6 @@ static dir_entry *get_dentfromdir(fsdata *mydata, int startsect,
 	__u16 prevcksum = 0xffff;
 	__u32 curclust = START(retdent);
 	int files = 0, dirs = 0;
-
 	debug("get_dentfromdir: %s\n", filename);
 
 	while (1) {
@@ -719,7 +721,6 @@ static dir_entry *get_dentfromdir(fsdata *mydata, int startsect,
 			}
 
 			memcpy(retdent, dentptr, sizeof(dir_entry));
-
 			debug("DentName: %s", s_name);
 			debug(", start: 0x%x", START(dentptr));
 			debug(", size:  0x%x %s\n",
@@ -802,7 +803,6 @@ read_bootsectandvi(boot_sector *bs, volume_info *volinfo, int *fatsize)
 			goto exit;
 		}
 	}
-
 	debug("Error: broken fs_type sign\n");
 fail:
 	ret = -1;
@@ -813,7 +813,14 @@ exit:
 
 __u8 do_fat_read_at_block[MAX_CLUSTSIZE]
 	__aligned(ARCH_DMA_MINALIGN);
-
+int do_fat_read_at(const char *filename, loff_t pos, void *buffer,
+		   loff_t maxsize, int dols, int dogetsize, loff_t *size);
+//@ ghost int ifat;
+//   ssigns \result \from ifat;  
+/* @ assigns *size \fom maxsize;
+   @ ensures 0 <= *size <= maxsize;
+   @ ensures 0 <= \result <= 1;
+   @*/
 int do_fat_read_at(const char *filename, loff_t pos, void *buffer,
 		   loff_t maxsize, int dols, int dogetsize, loff_t *size)
 {
@@ -881,10 +888,8 @@ int do_fat_read_at(const char *filename, loff_t pos, void *buffer,
 		debug("Error: allocating memory\n");
 		return -1;
 	}
-
 	if (vfat_enabled)
 		debug("VFAT Support enabled\n");
-
 	debug("FAT%d, fat_sect: %d, fatlength: %d\n",
 	       mydata->fatsize, mydata->fat_sect, mydata->fatlength);
 	debug("Rootdir begins at cluster: %d, sector: %d, offset: %x\n"
@@ -959,7 +964,6 @@ root_reparse:
 		if (do_read) {
 			read_blk = (mydata->fatsize == 32) ?
 				    mydata->clust_size : PREFETCH_BLOCKS;
-
 			debug("FAT read(sect=%d, cnt:%d), clust_size=%d, DIRENTSPERBLOCK=%zd\n",
 				cursect, read_blk, mydata->clust_size, DIRENTSPERBLOCK);
 
@@ -988,8 +992,7 @@ root_reparse:
 				if (vfat_enabled &&
 				    (dentptr->attr & ATTR_VFAT) == ATTR_VFAT &&
 				    (dentptr->name[0] & LAST_LONG_ENTRY_MASK)) {
-					prevcksum =
-						((dir_slot *)dentptr)->alias_checksum;
+					prevcksum = ((dir_slot *)dentptr)->alias_checksum;
 
 					get_vfatname(mydata,
 						     root_cluster,
@@ -1095,7 +1098,6 @@ root_reparse:
 
 			if (isdir && !(dentptr->attr & ATTR_DIR))
 				goto exit;
-
 			debug("RootName: %s", s_name);
 			debug(", start: 0x%x", START(dentptr));
 			debug(", size:  0x%x %s\n",
@@ -1226,6 +1228,7 @@ rootdir_done:
 		ret = 0;
 	} else {
 		ret = get_contents(mydata, dentptr, pos, buffer, maxsize, size);
+
 	}
 	debug("Size: %u, got: %llu\n", FAT2CPU32(dentptr->size), *size);
 
@@ -1283,7 +1286,6 @@ int file_fat_detectfs(void)
 	default:
 		printf("Unknown");
 	}
-
 	printf("\n  Device %d: ", cur_dev->dev);
 	dev_print(cur_dev);
 #endif
@@ -1296,7 +1298,6 @@ int file_fat_detectfs(void)
 	memcpy(vol_label, volinfo.volume_label, 11);
 	vol_label[11] = '\0';
 	volinfo.fs_type[5] = '\0';
-
 	printf("Filesystem: %s \"%s\"\n", volinfo.fs_type, vol_label);
 
 	return 0;
@@ -1334,8 +1335,7 @@ int file_fat_read_at(const char *filename, loff_t pos, void *buffer,
 int file_fat_read(const char *filename, void *buffer, int maxsize)
 {
 	loff_t actread;
-	int ret;
-
+	int ret;	
 	ret =  file_fat_read_at(filename, 0, buffer, maxsize, &actread);
 	if (ret)
 		return ret;

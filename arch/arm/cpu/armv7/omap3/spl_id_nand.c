@@ -21,6 +21,7 @@
 static struct gpmc *gpmc_config = (struct gpmc *)GPMC_BASE;
 
 /* nand_command: Send a flash command to the flash chip */
+#define ___SKIP_nand_command_spl_FUNC
 static void nand_command(u8 command)
 {
 	writeb(command, &gpmc_config->cs[0].nand_cmd);
@@ -44,6 +45,7 @@ static void nand_command(u8 command)
 void identify_nand_chip(int *mfr, int *id)
 {
 	/* Make sure that we have setup GPMC for NAND correctly. */
+#define ___SKIP_identify_nand_chip0_spl_START
 	writel(M_NAND_GPMC_CONFIG1, &gpmc_config->cs[0].config1);
 	writel(M_NAND_GPMC_CONFIG2, &gpmc_config->cs[0].config2);
 	writel(M_NAND_GPMC_CONFIG3, &gpmc_config->cs[0].config3);
@@ -58,7 +60,7 @@ void identify_nand_chip(int *mfr, int *id)
 	writel((GPMC_SIZE_128M << 8) | (GPMC_CS_ENABLE << 6) |
 				((NAND_BASE >> 24) & GPMC_BASEADDR_MASK),
 			&gpmc_config->cs[0].config7);
-
+#define ___SKIP_identify_nand_chip0_spl_END
 	sdelay(2000);
 
 	/* Issue a RESET and then READID */
@@ -66,9 +68,11 @@ void identify_nand_chip(int *mfr, int *id)
 	nand_command(NAND_CMD_READID);
 
 	/* Set the address to read to 0x0 */
+#define ___SKIP_identify_nand_chip1_spl_START	
 	writeb(0x0, &gpmc_config->cs[0].nand_adr);
 
 	/* Read off the manufacturer and device id. */
 	*mfr = readb(&gpmc_config->cs[0].nand_dat);
 	*id = readb(&gpmc_config->cs[0].nand_dat);
+#define ___SKIP_identify_nand_chip1_spl_END	
 }

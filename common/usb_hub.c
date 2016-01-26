@@ -241,7 +241,7 @@ int hub_port_reset(struct udevice *dev, int port, unsigned short *portstat)
 
 int usb_hub_port_connect_change(struct usb_device *dev, int port)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(struct usb_port_status, portsts, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(struct usb_port_status, portsts, 1);
 	unsigned short portstatus;
 	int ret, speed;
 
@@ -465,7 +465,7 @@ static int usb_hub_configure(struct usb_device *dev)
 		usb_hub_reset_devices(i + 1);
 
 	for (i = 0; i < dev->maxchild; i++) {
-		ALLOC_CACHE_ALIGN_BUFFER(struct usb_port_status, portsts, 1);
+	  ALLOC_CACHE_ALIGN_BUFFER(struct usb_port_status, portsts, 1);
 		unsigned short portstatus, portchange;
 		int ret;
 		ulong start = get_timer(0);

@@ -82,9 +82,11 @@ ENTRY(c_runtime_cpu_setup)
 	mcr     p15, 0, r0, c7, c10, 4	@ DSB
 	mcr     p15, 0, r0, c7, c5, 4	@ ISB
 #endif
-
+#ifndef CONFIG_BEAGLEXM
 	bx	lr
-
+#else
+	bl clear_bss
+#endif
 ENDPROC(c_runtime_cpu_setup)
 
 /*************************************************************************

@@ -60,8 +60,11 @@ ENTRY(relocate_vectors)
 	stmia	r1!, {r2-r8,r10}
 #endif
 #endif
+#ifndef CONFIG_BEAGLEXM
 	bx	lr
-
+#else
+	bl c_runtime_cpu_setup
+#endif
 ENDPROC(relocate_vectors)
 
 /*
@@ -77,12 +80,14 @@ ENDPROC(relocate_vectors)
  */
 
 ENTRY(relocate_code)
+#define ___RELOC_reloc_code_main_BEGIN		
 	ldr	r1, =__image_copy_start	/* r1 <- SRC &__image_copy_start */
 	subs	r4, r0, r1		/* r4 <- relocation offset */
 	beq	relocate_done		/* skip relocation */
 	ldr	r2, =__image_copy_end	/* r2 <- SRC &__image_copy_end */
 
 copy_loop:
+#define ___LONGWRITE_relocate_code_main_BREAK				
 	ldmia	r1!, {r10-r11}		/* copy from source address [r1]    */
 	stmia	r0!, {r10-r11}		/* copy to   target address [r0]    */
 	cmp	r1, r2			/* until source end address [r2]    */
@@ -124,6 +129,7 @@ relocate_done:
 #ifdef __ARM_ARCH_4__
 	mov	pc, lr
 #else
+#define ___RELOC_reloc_code_main_READY
 	bx	lr
 #endif
 

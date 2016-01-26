@@ -60,6 +60,9 @@
 #include <dm/root.h>
 #include <linux/compiler.h>
 
+#ifdef CONFIG_BEAGLEXM
+int _main_finish();
+#endif
 /*
  * Pointer to initial global data area
  *
@@ -1032,6 +1035,9 @@ void board_init_f(ulong boot_flags)
 
 	if (initcall_run_list(init_sequence_f))
 		hang();
+#ifdef CONFIG_BEAGLEXM
+	_main_finish();
+#endif
 
 #if !defined(CONFIG_ARM) && !defined(CONFIG_SANDBOX) && \
 		!defined(CONFIG_EFI_APP)

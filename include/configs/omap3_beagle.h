@@ -41,6 +41,7 @@
 #define CONFIG_ENV_OVERWRITE
 
 /* Status LED */
+#ifndef CONFIG_BEAGLEXM
 #define CONFIG_STATUS_LED		1
 #define CONFIG_BOARD_SPECIFIC_LED	1
 #define STATUS_LED_BIT			0x01
@@ -51,7 +52,7 @@
 #define STATUS_LED_PERIOD1		(CONFIG_SYS_HZ / 2)
 #define STATUS_LED_BOOT			STATUS_LED_BIT
 #define STATUS_LED_GREEN		STATUS_LED_BIT1
-
+#endif
 /* Enable Multi Bus support for I2C */
 #define CONFIG_I2C_MULTI_BUS		1
 
@@ -74,7 +75,9 @@
 #define CONFIG_G_DNL_MANUFACTURER	"TI"
 #define CONFIG_USB_FUNCTION_FASTBOOT
 #define CONFIG_CMD_FASTBOOT
+#ifndef CONFIG_BEAGLEXM
 #define CONFIG_ANDROID_BOOT_IMAGE
+#endif
 #define CONFIG_FASTBOOT_BUF_ADDR	CONFIG_SYS_LOAD_ADDR
 #define CONFIG_FASTBOOT_BUF_SIZE	0x07000000
 
@@ -106,9 +109,13 @@
 					"4m(kernel),-(fs)"
 
 #define CONFIG_USB_STORAGE	/* USB storage support		*/
+#ifndef  CONFIG_BEAGLEXM
 #define CONFIG_CMD_NAND		/* NAND support			*/
 #define CONFIG_CMD_LED		/* LED support			*/
+#endif
+
 #define CONFIG_CMD_DHCP
+
 
 #define CONFIG_VIDEO_OMAP3	/* DSS Support			*/
 
@@ -120,11 +127,12 @@
 /*
  * Board NAND Info.
  */
+#ifndef CONFIG_BEAGLEXM
 #define CONFIG_NAND_OMAP_GPMC
 #define CONFIG_SYS_MAX_NAND_DEVICE	1		/* Max number of NAND */
-							/* devices */
-
-#define CONFIG_EXTRA_ENV_SETTINGS \
+#endif
+#ifndef  CONFIG_BEAGLEXM
+#define CONFIG_EXTRA_ENV_SETTINGS		\
 	"loadaddr=0x80200000\0" \
 	"rdaddr=0x81000000\0" \
 	"fdt_high=0xffffffff\0" \
@@ -255,7 +263,25 @@
 	"if run loadimage; then " \
 		"run loadfdt;" \
 		"run mmcbootz; " \
-	"fi; " \
+	"fi; "
+#else
+#define CONFIG_EXTRA_ENV_SETTINGS		\
+	"mmcargs=setenv bootargs console=ttyO2,115200n8 " \
+		"mpurate=auto " \
+		"buddy=none "\
+		"camera=none "\
+		"vram=12M " \
+		"omapfb.mode=dvi:640x480MR-16@60 " \
+		"omapdss.def_disp=dvi " \
+		"root=/dev/mmcblk0p2 rw " \
+		"rootfstype=ext3 rootwait\0"
+#define CONFIG_BOOTCOMMAND \
+	"mmc dev 0; "\
+	"load mmc 0:2 0x80200000 /boot/uImage; " \
+	"echo Booting from mmc ...; "		\
+	"run mmcargs; "				\
+	"bootm 0x80200000; "
+#endif
 
 /*
  * OMAP3 has 12 GP timers, they can be driven by the system clock
@@ -277,7 +303,14 @@
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_FLASH_BASE
 #define CONFIG_SYS_ONENAND_BASE		ONENAND_MAP
 
+#ifndef CONFIG_BEAGLEXM
 #define CONFIG_ENV_IS_IN_NAND		1
+#else
+#define CONFIG_ENV_IS_NOWHERE 1
+#undef CONFIG_SPL_ENV_SUPPORT
+#undef CONFIG_SPL_NAND_SUPPORT
+#undef CONFIG_NAND_BOOT
+#endif
 #define CONFIG_ENV_SIZE			(128 << 10)	/* 128 KiB */
 #define ONENAND_ENV_OFFSET		0x260000 /* environment starts here */
 #define SMNAND_ENV_OFFSET		0x260000 /* environment starts here */
@@ -293,25 +326,21 @@
 /* Defines for SPL */
 #define CONFIG_SPL_OMAP3_ID_NAND
 
-/* NAND boot config */
-#define CONFIG_SYS_NAND_BUSWIDTH_16BIT
-#define CONFIG_SYS_NAND_5_ADDR_CYCLE
-#define CONFIG_SYS_NAND_PAGE_COUNT	64
-#define CONFIG_SYS_NAND_PAGE_SIZE	2048
-#define CONFIG_SYS_NAND_OOBSIZE		64
-#define CONFIG_SYS_NAND_BLOCK_SIZE	(128*1024)
-#define CONFIG_SYS_NAND_BAD_BLOCK_POS	0
-#define CONFIG_SYS_NAND_ECCPOS		{2, 3, 4, 5, 6, 7, 8, 9,\
-						10, 11, 12, 13}
-#define CONFIG_SYS_NAND_ECCSIZE		512
-#define CONFIG_SYS_NAND_ECCBYTES	3
-#define CONFIG_NAND_OMAP_ECCSCHEME	OMAP_ECC_HAM1_CODE_HW
-#define CONFIG_SYS_NAND_U_BOOT_OFFS	0x80000
+
+
 /* NAND: SPL falcon mode configs */
 #ifdef CONFIG_SPL_OS_BOOT
 #define CONFIG_CMD_SPL_NAND_OFS		0x240000
 #define CONFIG_SYS_NAND_SPL_KERNEL_OFFS	0x280000
 #define CONFIG_CMD_SPL_WRITE_SIZE	0x2000
+#endif
+
+#ifdef CONFIG_BEAGLEXM
+#define CONFIG_MIN_BOOT
+#define CONFIG_SPL_PANIC_ON_RAW_IMAGE
+#undef CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_PARTITION
+
+/* #undef CONFIG_EFI_PARTITION */
 #endif
 
 #endif /* __CONFIG_H */

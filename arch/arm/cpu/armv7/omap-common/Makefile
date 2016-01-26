@@ -23,7 +23,9 @@ obj-$(CONFIG_SCSI_AHCI_PLAT) += sata.o
 endif
 
 ifeq ($(CONFIG_SYS_DCACHE_OFF),)
+ifndef CONFIG_MIN_BOOT
 obj-y	+= omap-cache.o
+endif
 endif
 
 obj-y	+= boot-common.o

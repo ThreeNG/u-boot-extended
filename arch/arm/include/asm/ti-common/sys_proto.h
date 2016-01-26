@@ -6,7 +6,7 @@
  */
 #ifndef _TI_COMMON_SYS_PROTO_H_
 #define _TI_COMMON_SYS_PROTO_H_
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_OMAP_COMMON

@@ -13,8 +13,10 @@
 
 struct i2c_adapter *i2c_get_adapter(int index)
 {
+#define ___FRAMAC_i2c_adap_start_spl_PATCH
 	struct i2c_adapter *i2c_adap_p = ll_entry_start(struct i2c_adapter,
 						i2c);
+#define ___FRAMAC_i2c_adap_max_spl_PATCH	
 	int max = ll_entry_count(struct i2c_adapter, i2c);
 	int i;
 
@@ -42,9 +44,11 @@ DECLARE_GLOBAL_DATA_PTR;
 void i2c_reloc_fixup(void)
 {
 #if defined(CONFIG_NEEDS_MANUAL_RELOC)
+#define ___FRAMAC_i2c_adap_start_spl_PATCH
 	struct i2c_adapter *i2c_adap_p = ll_entry_start(struct i2c_adapter,
 						i2c);
 	struct i2c_adapter *tmp = i2c_adap_p;
+#define ___FRAMAC_i2c_adap_max_spl_PATCH
 	int max = ll_entry_count(struct i2c_adapter, i2c);
 	int		i;
 	unsigned long	addr;
@@ -141,7 +145,6 @@ static int i2c_mux_set(struct i2c_adapter *adap, int mux_id, int chip,
 		printf("%s: wrong mux id: %d\n", __func__, mux_id);
 		return -1;
 	}
-
 	ret = adap->write(adap, chip, 0, 0, &buf, 1);
 	if (ret)
 		printf("%s: could not set mux: id: %d chip: %x channel: %d\n",
@@ -162,7 +165,6 @@ static int i2c_mux_set_all(void)
 
 			if (i2c_bus_tmp->next_hop[i].chip == 0)
 				break;
-
 			ret = i2c_mux_set(I2C_ADAP,
 					i2c_bus_tmp->next_hop[i].mux.id,
 					i2c_bus_tmp->next_hop[i].chip,
@@ -179,7 +181,6 @@ static int i2c_mux_disconnect_all(void)
 	struct	i2c_bus_hose *i2c_bus_tmp = &i2c_bus[I2C_BUS];
 	int	i;
 	uint8_t	buf = 0;
-
 	if (I2C_ADAP->init_done == 0)
 		return 0;
 
@@ -193,8 +194,7 @@ static int i2c_mux_disconnect_all(void)
 
 			chip = i2c_bus_tmp->next_hop[--i].chip;
 			if (chip == 0)
-				continue;
-
+				continue
 			ret = I2C_ADAP->write(I2C_ADAP, chip, 0, 0, &buf, 1);
 			if (ret != 0) {
 				printf("i2c: mux disconnect error\n");
@@ -216,9 +216,9 @@ static int i2c_mux_disconnect_all(void)
  */
 static void i2c_init_bus(unsigned int bus_no, int speed, int slaveaddr)
 {
+#define ___FRAMAC_i2c_init_bus_spl_PATCH
 	if (bus_no >= CONFIG_SYS_NUM_I2C_BUSES)
 		return;
-
 	I2C_ADAP->init(I2C_ADAP, speed, slaveaddr);
 
 	if (gd->flags & GD_FLG_RELOC) {
@@ -276,7 +276,6 @@ unsigned int i2c_get_bus_num(void)
 int i2c_set_bus_num(unsigned int bus)
 {
 	int max;
-
 	if ((bus == I2C_BUS) && (I2C_ADAP->init_done > 0))
 		return 0;
 
@@ -284,7 +283,8 @@ int i2c_set_bus_num(unsigned int bus)
 	if (bus >= CONFIG_SYS_NUM_I2C_BUSES)
 		return -1;
 #endif
-
+	
+#define ___FRAMAC_i2c_adap_max_spl_PATCH
 	max = ll_entry_count(struct i2c_adapter, i2c);
 	if (I2C_ADAPTER(bus) >= max) {
 		printf("Error, wrong i2c adapter %d max %d possible\n",

@@ -8,6 +8,7 @@
 #include <asm/arch/sys_proto.h>
 static void do_cancel_out(u32 *num, u32 *den, u32 factor)
 {
+  //@ loop pragma UNROLL 0;  
 	while (1) {
 		if (((*num)/factor*factor == (*num)) &&
 		   ((*den)/factor*factor == (*den))) {
@@ -31,6 +32,7 @@ void cancel_out(u32 *num, u32 *den, u32 den_limit)
 	do_cancel_out(num, den, 11);
 	do_cancel_out(num, den, 13);
 	do_cancel_out(num, den, 17);
+	//loop pragma UNROLL 1;
 	while ((*den) > den_limit) {
 		*num /= 2;
 		/*
@@ -107,7 +109,6 @@ void omap_die_id_display(void)
 	unsigned int die_id[4] = { 0 };
 
 	omap_die_id(die_id);
-
 	printf("OMAP die ID: %08x%08x%08x%08x", die_id[0], die_id[1], die_id[2],
 		die_id[3]);
 }

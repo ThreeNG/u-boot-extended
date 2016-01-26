@@ -50,6 +50,7 @@ int ext4fs_devread(lbaint_t sector, int byte_offset, int byte_len, char *buf)
 {
 	unsigned block_len;
 	int log2blksz = ext4fs_block_dev_desc->log2blksz;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(char, sec_buf, (ext4fs_block_dev_desc ?
 						 ext4fs_block_dev_desc->blksz :
 						 0));
@@ -98,6 +99,7 @@ int ext4fs_devread(lbaint_t sector, int byte_offset, int byte_len, char *buf)
 	block_len = byte_len & ~(ext4fs_block_dev_desc->blksz - 1);
 
 	if (block_len == 0) {
+#define ___FRAMAC_align_buffer_spl_PATCH
 		ALLOC_CACHE_ALIGN_BUFFER(u8, p, ext4fs_block_dev_desc->blksz);
 
 		block_len = ext4fs_block_dev_desc->blksz;

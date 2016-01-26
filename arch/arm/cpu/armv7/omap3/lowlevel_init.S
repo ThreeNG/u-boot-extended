@@ -42,8 +42,11 @@ ENDPROC(do_omap3_emu_romcode_call)
  * cpy_clk_code: relocates clock code into SRAM where its safer to execute
  * R1 = SRAM destination address.
  *************************************************************************/
+
 ENTRY(cpy_clk_code)
 	/* Copy DPLL code into SRAM */
+#define ___RELOC_clk_code_spl_BEGIN
+#define ___RELOC_clk_code_main_BEGIN
 	adr	r0, go_to_speed		/* copy from start of go_to_speed... */
 	adr	r2, lowlevel_init	/* ... up to start of low_level_init */
 next2:
@@ -51,6 +54,12 @@ next2:
 	stmia	r1!, {r3 - r10}		/* copy to   target address [r1] */
 	cmp	r0, r2			/* until source end address [r2] */
 	blo	next2
+
+#define ___RELOC_clk_code_spl_READY
+#define ___RELOC_clk_code_main_READY
+#ifdef CONFIG_BEAGLEXM
+	b lowlevel_init_finish			/* start of nex stage */
+#endif
 	mov	pc, lr			/* back to caller */
 ENDPROC(cpy_clk_code)
 
@@ -67,6 +76,10 @@ ENDPROC(cpy_clk_code)
  *        L3 when its not in self refresh seems bad for it.  Normally, this
  *	  code runs from flash before SDR is init so that should be ok.
  ****************************************************************************/
+#define ___SKIP_go_to_speed_spl_FUNC
+#define ___SKIP_go_to_speed_main_FUNC
+#define ___RELOC_clk_code_spl_CPYSTART
+#define ___RELOC_clk_code_main_CPYSTART	
 ENTRY(go_to_speed)
 	stmfd sp!, {r4 - r6}
 
@@ -168,7 +181,9 @@ pll_div_val5:
 	.word CLSEL1_EMU_VAL
 
 #endif
-
+	
+#define ___RELOC_clk_code_spl_CPYEND
+#define ___RELOC_clk_code_main_CPYEND
 ENTRY(lowlevel_init)
 	ldr	sp, SRAM_STACK
 	str	ip, [sp]	/* stash ip register */
@@ -177,17 +192,28 @@ ENTRY(lowlevel_init)
 /*
  * No need to copy/exec the clock code - DPLL adjust already done
  * in NAND/oneNAND Boot.
- */
+	*/
+#define ___RELOC_clk_code_spl_DST
+#define ___RELOC_clk_code_main_DST
 	ldr	r1, =SRAM_CLK_CODE
 	bl	cpy_clk_code
 #endif /* NAND Boot */
+#ifdef CONFIG_BEAGLEXM
+ENDPROC(lowlevel_init)
+ENTRY(lowlevel_init_finish)
+	mov	lr, ip		/* restore link reg */
+	ldr	ip, [sp]	/* restore save ip */
+	/* tail-call s_init to setup pll, mux, memory */
+	b	s_init	
+ENDPROC(lowlevel_init_finish)	
+#else
 	mov	lr, ip		/* restore link reg */
 	ldr	ip, [sp]	/* restore save ip */
 	/* tail-call s_init to setup pll, mux, memory */
 	b	s_init
 
 ENDPROC(lowlevel_init)
-
+#endif
 	/* the literal pools origin */
 	.ltorg
 

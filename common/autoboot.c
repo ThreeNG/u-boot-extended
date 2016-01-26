@@ -14,7 +14,7 @@
 #include <menu.h>
 #include <post.h>
 #include <u-boot/sha256.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #define MAX_DELAY_STOP_STR 32

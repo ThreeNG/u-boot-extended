@@ -5,6 +5,7 @@
  * Cause a link-time error if we try an unaligned access other than
  * 1,2,4 or 8 bytes long
  */
+#define ___FRAMAC_void_to_int_spl_PATCH
 extern void __bad_unaligned_access_size(void);
 
 #define __get_unaligned_le(ptr) ((__force typeof(*(ptr)))({			\

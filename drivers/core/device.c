@@ -23,7 +23,6 @@
 #include <dm/util.h>
 #include <linux/err.h>
 #include <linux/list.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 int device_bind(struct udevice *parent, const struct driver *drv,

@@ -11,7 +11,7 @@
 #include <linux/compiler.h>
 
 #if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF))
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 __weak void arm_init_before_mmu(void)
@@ -28,6 +28,7 @@ static void cp_delay (void)
 
 	/* copro seems to need some delay between reading and writing */
 	for (i = 0; i < 100; i++)
+#define ___LONGWRITE_cp_delay_main_BREAK		  
 		nop();
 	asm volatile("" : : : "memory");
 }

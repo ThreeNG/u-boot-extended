@@ -13,7 +13,7 @@
 #include <watchdog.h>
 #include <linux/types.h>
 #include <asm/io.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #define UART_LCRVAL UART_LCR_8N1		/* 8 data, 1 stop, no parity */
@@ -173,7 +173,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 		serial_out(0, &com_port->mdr1);
 	}
 #endif
-
+  //@ loop pragma UNROLL 2;
 	while (!(serial_in(&com_port->lsr) & UART_LSR_TEMT))
 		;
 
@@ -211,6 +211,7 @@ void NS16550_reinit(NS16550_t com_port, int baud_divisor)
 
 void NS16550_putc(NS16550_t com_port, char c)
 {
+  //@ loop pragma UNROLL 2;
 	while ((serial_in(&com_port->lsr) & UART_LSR_THRE) == 0)
 		;
 	serial_out(c, &com_port->thr);
@@ -228,6 +229,7 @@ void NS16550_putc(NS16550_t com_port, char c)
 #ifndef CONFIG_NS16550_MIN_FUNCTIONS
 char NS16550_getc(NS16550_t com_port)
 {
+  //@ loop pragma UNROLL 2;  
 	while ((serial_in(&com_port->lsr) & UART_LSR_DR) == 0) {
 #if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_USB_TTY)
 		extern void usbtty_poll(void);
@@ -287,6 +289,7 @@ static inline void _debug_uart_putc(int ch)
 {
 	struct NS16550 *com_port = (struct NS16550 *)CONFIG_DEBUG_UART_BASE;
 
+  //@ loop pragma UNROLL 2;	
 	while (!(serial_din(&com_port->lsr) & UART_LSR_THRE))
 		;
 	serial_dout(&com_port->thr, ch);

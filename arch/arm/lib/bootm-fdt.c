@@ -21,7 +21,7 @@
 #include <asm/armv7.h>
 #endif
 #include <asm/psci.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 int arch_fixup_fdt(void *blob)

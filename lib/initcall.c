@@ -7,7 +7,7 @@
 #include <common.h>
 #include <initcall.h>
 #include <efi.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 int initcall_run_list(const init_fnc_t init_sequence[])

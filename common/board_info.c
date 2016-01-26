@@ -18,7 +18,8 @@ int __weak checkboard(void)
 int show_board_info(void)
 {
 #if defined(CONFIG_OF_CONTROL) && !defined(CONFIG_CUSTOM_BOARDINFO)
-	DECLARE_GLOBAL_DATA_PTR;
+
+        DECLARE_GLOBAL_DATA_PTR;
 	const char *model;
 
 	model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);

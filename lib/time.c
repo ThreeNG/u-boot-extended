@@ -16,7 +16,7 @@
 #ifndef CONFIG_WD_PERIOD
 # define CONFIG_WD_PERIOD	(10 * 1000 * 1000)	/* 10 seconds default */
 #endif
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_SYS_TIMER_RATE
@@ -139,17 +139,19 @@ void __weak __udelay(unsigned long usec)
 	uint64_t tmp;
 
 	tmp = get_ticks() + usec_to_tick(usec);	/* get current timestamp */
-
+  //@ loop pragma UNROLL 0;
 	while (get_ticks() < tmp+1)	/* loop till event */
 		 /*NOP*/;
 }
 
 /* ------------------------------------------------------------------------- */
 
+#define ___SKIP_udelay_spl_FUNC
+#define ___SKIP_udelay_main_FUNC
 void udelay(unsigned long usec)
 {
 	ulong kv;
-
+	//@ loop pragma UNROLL 0;
 	do {
 		WATCHDOG_RESET();
 		kv = usec > CONFIG_WD_PERIOD ? CONFIG_WD_PERIOD : usec;
@@ -160,6 +162,7 @@ void udelay(unsigned long usec)
 
 void mdelay(unsigned long msec)
 {
+  //@ loop pragma UNROLL 0;  
 	while (msec--)
 		udelay(1000);
 }

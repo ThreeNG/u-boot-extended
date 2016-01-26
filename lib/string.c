@@ -73,7 +73,7 @@ char * ___strtok;
 char * strcpy(char * dest,const char *src)
 {
 	char *tmp = dest;
-
+#define ___LONGWRITE_strcpy_main_BREAK	
 	while ((*dest++ = *src++) != '\0')
 		/* nothing */;
 	return tmp;
@@ -94,7 +94,7 @@ char * strcpy(char * dest,const char *src)
 char * strncpy(char * dest,const char *src,size_t count)
 {
 	char *tmp = dest;
-
+#define ___LONGWRITE_strncpy_main_BREAK	
 	while (count-- && (*dest++ = *src++) != '\0')
 		/* nothing */;
 
@@ -139,6 +139,7 @@ char * strcat(char * dest, const char * src)
 
 	while (*dest)
 		dest++;
+#define ___LONGWRITE_strcat_main_BREAK	
 	while ((*dest++ = *src++) != '\0')
 		;
 
@@ -184,7 +185,7 @@ char * strncat(char *dest, const char *src, size_t count)
 int strcmp(const char * cs,const char * ct)
 {
 	register signed char __res;
-
+	//@ loop pragma UNROLL 1;
 	while (1) {
 		if ((__res = *cs - *ct++) != 0 || !*cs++)
 			break;
@@ -206,6 +207,8 @@ int strncmp(const char * cs,const char * ct,size_t count)
 	register signed char __res = 0;
 
 	while (count) {
+	  	//@ assert \initialized(cs);
+	  	//@ assert \initialized(ct);	  
 		if ((__res = *cs - *ct++) != 0 || !*cs++)
 			break;
 		count--;
@@ -442,14 +445,17 @@ void * memset(void * s,int c,size_t count)
 	int i;
 
 	/* do it one word at a time (32 bits or 64 bits) while possible */
+	//@ assert \pointer_comparable( (void *) ((ulong) s & (sizeof(*sl) -1)), (void *) 0);
 	if ( ((ulong)s & (sizeof(*sl) - 1)) == 0) {
 		for (i = 0; i < sizeof(*sl); i++) {
 			cl <<= 8;
 			cl |= c & 0xff;
 		}
 		while (count >= sizeof(*sl)) {
-			*sl++ = cl;
-			count -= sizeof(*sl);
+#define ___LONGWRITE_memset_spl_BREAK
+#define ___LONGWRITE_memset_main_BREAK
+		  *sl++ = cl;
+		  count -= sizeof(*sl);
 		}
 	}
 	/* fill 8 bits at a time */
@@ -505,7 +511,11 @@ void * memcpy(void *dest, const void *src, size_t count)
 
 	/* while all data is aligned (common case), copy a word at a time */
 	if ( (((ulong)dest | (ulong)src) & (sizeof(*dl) - 1)) == 0) {
-		while (count >= sizeof(*dl)) {
+#define ___LONGWRITE_memcpy_main_CONT
+#define ___LONGWRITE_memcpy_spl_CONT	  
+	  while (count >= sizeof(*dl)) {
+#define ___LONGWRITE_memcpy_spl_BREAK
+#define ___LONGWRITE_memcpy_main_BREAK		  
 			*dl++ = *sl++;
 			count -= sizeof(*dl);
 		}
@@ -539,13 +549,16 @@ void * memmove(void * dest,const void *src,size_t count)
 	if (dest <= src) {
 		tmp = (char *) dest;
 		s = (char *) src;
+#define ___LONGWRITE_memmove_main_CONT
 		while (count--)
+#define ___LONGWRITE_memmove_main_BREAK
 			*tmp++ = *s++;
 		}
 	else {
 		tmp = (char *) dest + count;
 		s = (char *) src + count;
 		while (count--)
+#define ___LONGWRITE_memmovedec_main_BREAK
 			*--tmp = *--s;
 		}
 
@@ -566,6 +579,8 @@ int memcmp(const void * cs,const void * ct,size_t count)
 	int res = 0;
 
 	for( su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
+	  	  //@ assert \initialized(su1);
+	  	  //@ assert \initialized(su2);
 		if ((res = *su1 - *su2) != 0)
 			break;
 	return res;

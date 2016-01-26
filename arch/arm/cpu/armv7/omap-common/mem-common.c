@@ -35,7 +35,6 @@ u32 mem_ok(u32 cs)
 	u32 pattern = 0x12345678;
 
 	addr = OMAP34XX_SDRC_CS0 + get_sdr_cs_offset(cs);
-
 	writel(0x0, addr + 0x400);	/* clear pos A */
 	writel(pattern, addr);		/* pattern to pos B */
 	writel(0x0, addr + 4);		/* remove pattern off the bus */

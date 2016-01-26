@@ -42,6 +42,7 @@ struct omap_boot_parameters {
 	unsigned char boot_device;
 	unsigned char reset_reason;
 };
+
 #endif
 
 #endif

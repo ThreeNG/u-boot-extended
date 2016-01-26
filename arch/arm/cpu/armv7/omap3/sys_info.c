@@ -64,6 +64,8 @@ u32 get_cpu_type(void)
  * get_cpu_id(void) - extract cpu id
  * returns 0 for ES1.0, cpuid otherwise
  ******************************************/
+#define ___SKIP_get_cpu_id_spl_FUNC
+#define ___SKIP_get_cpu_id_main_FUNC
 u32 get_cpu_id(void)
 {
 	struct ctrl_id *id_base;
@@ -73,13 +75,15 @@ u32 get_cpu_id(void)
 	 * On ES1.0 the IDCODE register is not exposed on L4
 	 * so using CPU ID to differentiate between ES1.0 and > ES1.0.
 	 */
+#define ___FRAMAC_cpuid_spl_PATCH
 	__asm__ __volatile__("mrc p15, 0, %0, c0, c0, 0":"=r"(cpuid));
+	
 	if ((cpuid & 0xf) == 0x0) {
 		return 0;
 	} else {
 		/* Decode the IDs on > ES1.0 */
-		id_base = (struct ctrl_id *) OMAP34XX_ID_L4_IO_BASE;
 
+		id_base = (struct ctrl_id *) OMAP34XX_ID_L4_IO_BASE;
 		cpuid = readl(&id_base->idcode);
 	}
 
@@ -184,8 +188,8 @@ u32 __weak get_board_rev(void)
 static u32 get_base(void)
 {
 	u32 val;
-
 	__asm__ __volatile__("mov %0, pc \n":"=r"(val)::"memory");
+#define ___FRAMAC_val_spl_PATCH
 	val &= 0xF0000000;
 	val >>= 28;
 	return val;
@@ -328,7 +332,6 @@ int print_cpuinfo (void)
 	default:
 		sec_s = "?";
 	}
-
 	if (CPU_OMAP36XX == get_cpu_family())
 		printf("%s%s-%s ES%s, CPU-OPP2, L3-200MHz, Max CPU Clock %s\n",
 		       cpu_family_s, cpu_s, sec_s,

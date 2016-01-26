@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <spl.h>
 #include <net.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 int spl_net_load_image(const char *device)

@@ -81,6 +81,13 @@ static inline gd_t *get_gd(void)
 #define DECLARE_GLOBAL_DATA_PTR		register volatile gd_t *gd asm ("x18")
 #else
 #define DECLARE_GLOBAL_DATA_PTR		register volatile gd_t *gd asm ("r9")
+//@ ghost gd_t *gdghost;
+/*@ ghost
+    gd_t *read_gd(gd_t **p) { return gdghost; }
+  */
+/*@ ghost 
+    gd_t *write_gd(gd_t **p, gd_t *x) { return gdghost = x; }
+  */
 #endif
 #endif
 

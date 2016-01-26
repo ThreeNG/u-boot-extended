@@ -13,12 +13,14 @@
  * consistent manner.
  */
 
+
 #define CONFIG_BOOTP_BOOTPATH
 #define CONFIG_BOOTP_DNS
 #define CONFIG_BOOTP_GATEWAY
 #define CONFIG_BOOTP_HOSTNAME
 #define CONFIG_BOOTP_PXE
 #define CONFIG_BOOTP_SUBNETMASK
+
 
 #if defined(__arm__) || defined(__aarch64__)
 #define CONFIG_BOOTP_PXE_CLIENTARCH     0x100
@@ -42,7 +44,6 @@
 #endif
 
 #define CONFIG_OF_LIBFDT
-
 #ifdef CONFIG_ARM64
 #define CONFIG_CMD_BOOTI
 #else

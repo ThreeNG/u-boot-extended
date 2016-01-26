@@ -43,15 +43,28 @@ struct gpio_bank {
 
 #endif
 
+// ghost int igth;
+/* assigns \result \from igth;
+  ensures (\result == 0) || (\result == 1) || (\result == 2) ||(\result == 3);
+ */
 static inline int get_gpio_index(int gpio)
 {
 	return gpio & 0x1f;
 }
 
+
+// ghost int igt = 0;
+// ghost int igto = 1;
+/* assigns \result \from { igt, igto };
+  ensures (\result == 1) || (\result == 0);
+ */
 int gpio_is_valid(int gpio)
 {
 	return (gpio >= 0) && (gpio < OMAP_MAX_GPIO);
 }
+
+#define ___SKIP__set_gpio_direction_spl_FUNC
+#define ___SKIP__set_gpio_direction_main_FUNC
 
 static void _set_gpio_direction(const struct gpio_bank *bank, int gpio,
 				int is_input)
@@ -73,6 +86,8 @@ static void _set_gpio_direction(const struct gpio_bank *bank, int gpio,
  * Get the direction of the GPIO by reading the GPIO_OE register
  * corresponding to the specified bank.
  */
+#define ___SKIP__get_gpio_direction_spl_FUNC
+#define ___SKIP__get_gpio_direction_main_FUNC
 static int _get_gpio_direction(const struct gpio_bank *bank, int gpio)
 {
 	void *reg = bank->base;
@@ -103,6 +118,11 @@ static void _set_gpio_dataout(const struct gpio_bank *bank, int gpio,
 	__raw_writel(l, reg);
 }
 
+/* 
+  ensures 0 == \result || \result == 1;
+ */
+#define ___SKIP__get_gpio_value_spl_FUNC
+#define ___SKIP__get_gpio_value_main_FUNC
 static int _get_gpio_value(const struct gpio_bank *bank, int gpio)
 {
 	void *reg = bank->base;
@@ -127,7 +147,7 @@ static int _get_gpio_value(const struct gpio_bank *bank, int gpio)
 
 static inline const struct gpio_bank *get_gpio_bank(int gpio)
 {
-	return &omap_gpio_bank[gpio >> 5];
+  return &omap_gpio_bank[gpio >> 5];
 }
 
 static int check_gpio(int gpio)
@@ -205,6 +225,9 @@ int gpio_direction_output(unsigned gpio, int value)
  * Request a gpio before using it.
  *
  * NOTE: Argument 'label' is unused.
+ */
+/* assigns \result \from igt;
+  ensures \result == 0;
  */
 int gpio_request(unsigned gpio, const char *label)
 {

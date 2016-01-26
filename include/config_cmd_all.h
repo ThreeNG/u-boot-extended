@@ -12,7 +12,6 @@
 /*
  * Alphabetical list of all possible commands.
  */
-
 #define CONFIG_CMD_ASKENV	/* ask for env variable		*/
 #define CONFIG_CMD_BEDBUG	/* Include BedBug Debugger	*/
 #define CONFIG_CMD_BMP		/* BMP support			*/

@@ -48,7 +48,7 @@ env_t *env_ptr = (env_t *)CONFIG_NAND_ENV_DST;
 #else /* ! ENV_IS_EMBEDDED */
 env_t *env_ptr;
 #endif /* ENV_IS_EMBEDDED */
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /*

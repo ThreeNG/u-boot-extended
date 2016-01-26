@@ -37,6 +37,7 @@ int mmc_getwp(struct mmc *mmc)
 
 	if (wp < 0) {
 		if (mmc->cfg->ops->getwp)
+
 			wp = mmc->cfg->ops->getwp(mmc);
 		else
 			wp = 0;
@@ -57,9 +58,9 @@ int mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 #ifdef CONFIG_MMC_TRACE
 	int i;
 	u8 *ptr;
-
 	printf("CMD_SEND:%d\n", cmd->cmdidx);
 	printf("\t\tARG\t\t\t 0x%08X\n", cmd->cmdarg);
+	
 	ret = mmc->cfg->ops->send_cmd(mmc, cmd, data);
 	switch (cmd->resp_type) {
 		case MMC_RSP_NONE:
@@ -68,7 +69,7 @@ int mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
 		case MMC_RSP_R1:
 			printf("\t\tMMC_RSP_R1,5,6,7 \t 0x%08X \n",
 				cmd->response[0]);
-			break;
+			break;			       
 		case MMC_RSP_R1b:
 			printf("\t\tMMC_RSP_R1b\t\t 0x%08X \n",
 				cmd->response[0]);
@@ -120,11 +121,11 @@ int mmc_send_status(struct mmc *mmc, int timeout)
 	cmd.resp_type = MMC_RSP_R1;
 	if (!mmc_host_is_spi(mmc))
 		cmd.cmdarg = mmc->rca << 16;
-
 	while (1) {
-		err = mmc_send_cmd(mmc, &cmd, NULL);
+		err = mmc_send_cmd(mmc, &cmd, NULL);		
 		if (!err) {
-			if ((cmd.response[0] & MMC_STATUS_RDY_FOR_DATA) &&
+		  //@ assert \initialized(cmd.response);
+		  if ((cmd.response[0] & MMC_STATUS_RDY_FOR_DATA) &&
 			    (cmd.response[0] & MMC_STATUS_CURR_STATE) !=
 			     MMC_STATE_PRG)
 				break;
@@ -134,13 +135,11 @@ int mmc_send_status(struct mmc *mmc, int timeout)
 					cmd.response[0]);
 #endif
 				return COMM_ERR;
-			}
+				  }
 		} else if (--retries < 0)
 			return err;
-
 		if (timeout-- <= 0)
 			break;
-
 		udelay(1000);
 	}
 
@@ -174,16 +173,20 @@ int mmc_set_blocklen(struct mmc *mmc, int len)
 	return mmc_send_cmd(mmc, &cmd, NULL);
 }
 
+/* assigns \result \from (mmc_devices.next);
+   ensures \result == ((struct mmc *)(mmc_devices.next));
+*/
 struct mmc *find_mmc_device(int dev_num)
 {
 	struct mmc *m;
 	struct list_head *entry;
-
+	
+	//@ loop pragma UNROLL 2;	
 	list_for_each(entry, &mmc_devices) {
 		m = list_entry(entry, struct mmc, link);
-
 		if (m->block_dev.dev == dev_num)
 			return m;
+
 	}
 
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
@@ -215,7 +218,6 @@ static int mmc_read_blocks(struct mmc *mmc, void *dst, lbaint_t start,
 	data.blocks = blkcnt;
 	data.blocksize = mmc->read_bl_len;
 	data.flags = MMC_DATA_READ;
-
 	if (mmc_send_cmd(mmc, &cmd, &data))
 		return 0;
 
@@ -244,11 +246,9 @@ static ulong mmc_bread(int dev_num, lbaint_t start, lbaint_t blkcnt, void *dst)
 	struct mmc *mmc = find_mmc_device(dev_num);
 	if (!mmc)
 		return 0;
-
-	if ((start + blkcnt) > mmc->block_dev.lba) {
+	if ((start + blkcnt) > mmc->block_dev.lba) {	  
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-		printf("MMC: block number 0x" LBAF " exceeds max(0x" LBAF ")\n",
-			start + blkcnt, mmc->block_dev.lba);
+		printf("MMC: block number 0x" LBAF " exceeds max(0x" LBAF ")\n", start + blkcnt, mmc->block_dev.lba);
 #endif
 		return 0;
 	}
@@ -299,7 +299,7 @@ static int sd_send_op_cond(struct mmc *mmc)
 	int timeout = 1000;
 	int err;
 	struct mmc_cmd cmd;
-
+	//@ loop pragma UNROLL timeout;
 	while (1) {
 		cmd.cmdidx = MMC_CMD_APP_CMD;
 		cmd.resp_type = MMC_RSP_R1;
@@ -330,7 +330,7 @@ static int sd_send_op_cond(struct mmc *mmc)
 
 		if (err)
 			return err;
-
+		//@ assert \initialized(cmd.response);
 		if (cmd.response[0] & OCR_BUSY)
 			break;
 
@@ -370,11 +370,9 @@ static int mmc_send_op_cond_iter(struct mmc *mmc, int use_arg)
 	cmd.cmdidx = MMC_CMD_SEND_OP_COND;
 	cmd.resp_type = MMC_RSP_R3;
 	cmd.cmdarg = 0;
+	//@ assert \initialized(&mmc->ocr);	
 	if (use_arg && !mmc_host_is_spi(mmc))
-		cmd.cmdarg = OCR_HCS |
-			(mmc->cfg->voltages &
-			(mmc->ocr & OCR_VOLTAGE_MASK)) |
-			(mmc->ocr & OCR_ACCESS_MODE);
+		cmd.cmdarg = OCR_HCS | (mmc->cfg->voltages & (mmc->ocr & OCR_VOLTAGE_MASK)) |  (mmc->ocr & OCR_ACCESS_MODE);
 
 	err = mmc_send_cmd(mmc, &cmd, NULL);
 	if (err)
@@ -397,6 +395,7 @@ static int mmc_send_op_cond(struct mmc *mmc)
 			return err;
 
 		/* exit if not busy (flag seems to be inverted) */
+		//@ assert \initialized(&mmc->ocr);
 		if (mmc->ocr & OCR_BUSY)
 			break;
 	}
@@ -412,10 +411,11 @@ static int mmc_complete_op_cond(struct mmc *mmc)
 	int err;
 
 	mmc->op_cond_pending = 0;
+	//@ assert \initialized(&mmc->ocr);	
 	if (!(mmc->ocr & OCR_BUSY)) {
 		start = get_timer(0);
 		while (1) {
-			err = mmc_send_op_cond_iter(mmc, 1);
+			err = mmc_send_op_cond_iter(mmc, 1);			
 			if (err)
 				return err;
 			if (mmc->ocr & OCR_BUSY)
@@ -494,7 +494,8 @@ static int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
 
 static int mmc_change_freq(struct mmc *mmc)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
+  #define ___FRAMAC_align_buffer_spl_PATCH
+  ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
 	char cardtype;
 	int err;
 
@@ -513,7 +514,7 @@ static int mmc_change_freq(struct mmc *mmc)
 
 	if (err)
 		return err;
-
+	//@ assert \initialized(ext_csd+(0..600));
 	cardtype = ext_csd[EXT_CSD_CARD_TYPE] & 0xf;
 
 	err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING, 1);
@@ -526,7 +527,7 @@ static int mmc_change_freq(struct mmc *mmc)
 
 	if (err)
 		return err;
-
+	//@ assert \initialized(ext_csd+(0..600));
 	/* No high-speed support */
 	if (!ext_csd[EXT_CSD_HS_TIMING])
 		return 0;
@@ -631,6 +632,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 	u32 tot_enh_size_mult = 0;
 	u8 wr_rel_set;
 	int i, pidx, err;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
 
 	if (mode < MMC_HWPART_CONF_CHECK || mode > MMC_HWPART_CONF_COMPLETE)
@@ -825,7 +827,6 @@ int mmc_getcd(struct mmc *mmc)
 		else
 			cd = 1;
 	}
-
 	return cd;
 }
 
@@ -854,7 +855,9 @@ static int sd_change_freq(struct mmc *mmc)
 {
 	int err;
 	struct mmc_cmd cmd;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(uint, scr, 2);
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(uint, switch_status, 16);
 	struct mmc_data data;
 	int timeout;
@@ -894,10 +897,10 @@ retry_scr:
 
 		return err;
 	}
-
+	//@ assert \initialized(scr+(0..1));	
+	//@ assert \initialized(mmc->scr+(0..1));
 	mmc->scr[0] = __be32_to_cpu(scr[0]);
 	mmc->scr[1] = __be32_to_cpu(scr[1]);
-
 	switch ((mmc->scr[0] >> 24) & 0xf) {
 		case 0:
 			mmc->version = SD_VERSION_1_0;
@@ -931,6 +934,7 @@ retry_scr:
 			return err;
 
 		/* The high-speed function is busy.  Try again */
+		//@assert \initialized(switch_status+(0..7));
 		if (!(__be32_to_cpu(switch_status[7]) & SD_HIGHSPEED_BUSY))
 			break;
 	}
@@ -953,7 +957,6 @@ retry_scr:
 
 	if (err)
 		return err;
-
 	if ((__be32_to_cpu(switch_status[4]) & 0x0f000000) == 0x01000000)
 		mmc->card_caps |= MMC_MODE_HS;
 
@@ -1023,7 +1026,9 @@ static int mmc_startup(struct mmc *mmc)
 	uint mult, freq;
 	u64 cmult, csize, capacity;
 	struct mmc_cmd cmd;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(u8, test_csd, MMC_MAX_BLOCK_LEN);
 	int timeout = 1000;
 	bool has_parts = false;
@@ -1068,8 +1073,8 @@ static int mmc_startup(struct mmc *mmc)
 
 		if (err)
 			return err;
-
-		if (IS_SD(mmc))
+		//@ assert \initialized(cmd.response);
+		if (IS_SD(mmc)) 	
 			mmc->rca = (cmd.response[0] >> 16) & 0xffff;
 	}
 
@@ -1085,7 +1090,7 @@ static int mmc_startup(struct mmc *mmc)
 
 	if (err)
 		return err;
-
+	//@ assert \initialized(cmd.response+(0..3));
 	mmc->csd[0] = cmd.response[0];
 	mmc->csd[1] = cmd.response[1];
 	mmc->csd[2] = cmd.response[2];
@@ -1182,16 +1187,14 @@ static int mmc_startup(struct mmc *mmc)
 		err = mmc_send_ext_csd(mmc, ext_csd);
 		if (err)
 			return err;
+		//@ assert \initialized(ext_csd+(0..512));
 		if (ext_csd[EXT_CSD_REV] >= 2) {
 			/*
 			 * According to the JEDEC Standard, the value of
 			 * ext_csd's capacity is valid if the value is more
 			 * than 2GB
 			 */
-			capacity = ext_csd[EXT_CSD_SEC_CNT] << 0
-					| ext_csd[EXT_CSD_SEC_CNT + 1] << 8
-					| ext_csd[EXT_CSD_SEC_CNT + 2] << 16
-					| ext_csd[EXT_CSD_SEC_CNT + 3] << 24;
+			capacity = ext_csd[EXT_CSD_SEC_CNT] << 0 | ext_csd[EXT_CSD_SEC_CNT + 1] << 8 | ext_csd[EXT_CSD_SEC_CNT + 2] << 16 | ext_csd[EXT_CSD_SEC_CNT + 3] << 24;
 			capacity *= MMC_MAX_BLOCK_LEN;
 			if ((capacity >> 20) > 2 * 1024)
 				mmc->capacity_user = capacity;
@@ -1228,9 +1231,10 @@ static int mmc_startup(struct mmc *mmc)
 
 		/* store the partition info of emmc */
 		mmc->part_support = ext_csd[EXT_CSD_PARTITIONING_SUPPORT];
+		//assert Value: mem_access: \valid(mmc->part_support);		
 		if ((ext_csd[EXT_CSD_PARTITIONING_SUPPORT] & PART_SUPPORT) ||
 		    ext_csd[EXT_CSD_BOOT_MULT])
-			mmc->part_config = ext_csd[EXT_CSD_PART_CONF];
+		  mmc->part_config = ext_csd[EXT_CSD_PART_CONF];
 		if (part_completed &&
 		    (ext_csd[EXT_CSD_PARTITIONING_SUPPORT] & ENHNCD_SUPPORT))
 			mmc->part_attr = ext_csd[EXT_CSD_PARTITIONS_ATTRIBUTE];
@@ -1248,8 +1252,7 @@ static int mmc_startup(struct mmc *mmc)
 			if (!part_completed)
 				continue;
 			mmc->capacity_gp[i] = mult;
-			mmc->capacity_gp[i] *=
-				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+			mmc->capacity_gp[i] *= ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
 			mmc->capacity_gp[i] *= ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
 			mmc->capacity_gp[i] <<= 19;
 		}
@@ -1287,8 +1290,7 @@ static int mmc_startup(struct mmc *mmc)
 
 			if (err)
 				return err;
-			else
-				ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
+			else ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
 		}
 
 		if (ext_csd[EXT_CSD_ERASE_GROUP_DEF] & 0x01) {
@@ -1301,10 +1303,8 @@ static int mmc_startup(struct mmc *mmc)
 			 * JEDEC Standard JESD84-B45, 6.2.4
 			 */
 			if (mmc->high_capacity && part_completed) {
-				capacity = (ext_csd[EXT_CSD_SEC_CNT]) |
-					(ext_csd[EXT_CSD_SEC_CNT + 1] << 8) |
-					(ext_csd[EXT_CSD_SEC_CNT + 2] << 16) |
-					(ext_csd[EXT_CSD_SEC_CNT + 3] << 24);
+				capacity = (ext_csd[EXT_CSD_SEC_CNT]) | (ext_csd[EXT_CSD_SEC_CNT + 1] << 8)  | (ext_csd[EXT_CSD_SEC_CNT + 2] << 16)  | (ext_csd[EXT_CSD_SEC_CNT + 3] << 24);
+					
 				capacity *= MMC_MAX_BLOCK_LEN;
 				mmc->capacity_user = capacity;
 			}
@@ -1428,6 +1428,8 @@ static int mmc_startup(struct mmc *mmc)
 			if (err)
 				continue;
 
+			//@ assert \initialized(test_csd+(0..512));
+			// assert \initialized(ext_csd+(0..512));			
 			/* Only compare read only fields */
 			if (ext_csd[EXT_CSD_PARTITIONING_SUPPORT]
 				== test_csd[EXT_CSD_PARTITIONING_SUPPORT] &&
@@ -1472,13 +1474,14 @@ static int mmc_startup(struct mmc *mmc)
 #if !defined(CONFIG_SPL_BUILD) || \
 		(defined(CONFIG_SPL_LIBCOMMON_SUPPORT) && \
 		!defined(CONFIG_USE_TINY_PRINTF))
+	//@ assert \initialized(mmc->cid+(0..3));
 	sprintf(mmc->block_dev.vendor, "Man %06x Snr %04x%04x",
 		mmc->cid[0] >> 24, (mmc->cid[2] & 0xffff),
 		(mmc->cid[3] >> 16) & 0xffff);
-	sprintf(mmc->block_dev.product, "%c%c%c%c%c%c", mmc->cid[0] & 0xff,
-		(mmc->cid[1] >> 24), (mmc->cid[1] >> 16) & 0xff,
-		(mmc->cid[1] >> 8) & 0xff, mmc->cid[1] & 0xff,
-		(mmc->cid[2] >> 24) & 0xff);
+	//sprintf(mmc->block_dev.product, "%c%c%c%c%c%c", mmc->cid[0] & 0xff,
+	//	(mmc->cid[1] >> 24), (mmc->cid[1] >> 16) & 0xff,
+	//	(mmc->cid[1] >> 8) & 0xff, mmc->cid[1] & 0xff,
+	//	(mmc->cid[2] >> 24) & 0xff);
 	sprintf(mmc->block_dev.revision, "%d.%d", (mmc->cid[2] >> 20) & 0xf,
 		(mmc->cid[2] >> 16) & 0xf);
 #else
@@ -1507,7 +1510,7 @@ static int mmc_send_if_cond(struct mmc *mmc)
 
 	if (err)
 		return err;
-
+	//@ assert \valid(cmd.response);
 	if ((cmd.response[0] & 0xff) != 0xaa)
 		return UNUSABLE_ERR;
 	else
@@ -1525,14 +1528,16 @@ int __deprecated mmc_register(struct mmc *mmc)
 	return -1;
 }
 
+/* requires \valid((struct omap_hsmmc_data *) priv);
+  */
 struct mmc *mmc_create(const struct mmc_config *cfg, void *priv)
 {
 	struct mmc *mmc;
-
+	;
+	
 	/* quick validation */
-	if (cfg == NULL || cfg->ops == NULL || cfg->ops->send_cmd == NULL ||
-			cfg->f_min == 0 || cfg->f_max == 0 || cfg->b_max == 0)
-		return NULL;
+	if (cfg == NULL || cfg->ops == NULL || cfg->ops->send_cmd == NULL || cfg->f_min == 0 || cfg->f_max == 0 || cfg->b_max == 0)
+	  return NULL;
 
 	mmc = calloc(1, sizeof(*mmc));
 	if (mmc == NULL)
@@ -1555,12 +1560,10 @@ struct mmc *mmc_create(const struct mmc_config *cfg, void *priv)
 	mmc->block_dev.block_erase = mmc_berase;
 
 	/* setup initial part type */
+#define ___FRAMAC_delete_line_spl_PATCH			
 	mmc->block_dev.part_type = mmc->cfg->part_type;
-
 	INIT_LIST_HEAD(&mmc->link);
-
 	list_add_tail(&mmc->link, &mmc_devices);
-
 	return mmc;
 }
 
@@ -1608,6 +1611,7 @@ int mmc_start_init(struct mmc *mmc)
 	board_mmc_power_init();
 
 	/* made sure it's not NULL earlier */
+
 	err = mmc->cfg->ops->init(mmc);
 
 	if (err)
@@ -1674,9 +1678,7 @@ int mmc_init(struct mmc *mmc)
 
 	if (mmc->has_init)
 		return 0;
-
 	start = get_timer(0);
-
 	if (!mmc->init_in_progress)
 		err = mmc_start_init(mmc);
 
@@ -1712,14 +1714,14 @@ void print_mmc_devices(char separator)
 	struct list_head *entry;
 	char *mmc_type;
 
+	//@ loop pragma UNROLL 8;
 	list_for_each(entry, &mmc_devices) {
-		m = list_entry(entry, struct mmc, link);
+	  m = list_entry(entry, struct mmc, link);
 
 		if (m->has_init)
 			mmc_type = IS_SD(m) ? "SD" : "eMMC";
 		else
 			mmc_type = NULL;
-
 		printf("%s: %d", m->cfg->name, m->block_dev.dev);
 		if (mmc_type)
 			printf(" (%s)", mmc_type);
@@ -1729,6 +1731,7 @@ void print_mmc_devices(char separator)
 			if (separator != '\n')
 				puts (" ");
 		}
+
 	}
 
 	printf("\n");
@@ -1752,15 +1755,17 @@ static void do_preinit(void)
 {
 	struct mmc *m;
 	struct list_head *entry;
-
+	
+	//@ loop pragma UNROLL 8;	
 	list_for_each(entry, &mmc_devices) {
-		m = list_entry(entry, struct mmc, link);
 
+	  m = list_entry(entry, struct mmc, link);
 #ifdef CONFIG_FSL_ESDHC_ADAPTER_IDENT
 		mmc_set_preinit(m, 1);
 #endif
 		if (m->preinit)
 			mmc_start_init(m);
+
 	}
 }
 
@@ -1783,7 +1788,7 @@ static int mmc_probe(bd_t *bis)
 	uclass_foreach_dev(m, uc) {
 		ret = device_probe(m);
 		if (ret)
-			printf("%s - probe failed: %d\n", m->name, ret);
+		  printf("%s - probe failed: %d\n", m->name, ret);
 	}
 
 	return 0;
@@ -1800,12 +1805,7 @@ static int mmc_probe(bd_t *bis)
 
 int mmc_initialize(bd_t *bis)
 {
-	static int initialized = 0;
 	int ret;
-	if (initialized)	/* Avoid initializing mmc multiple times */
-		return 0;
-	initialized = 1;
-
 	INIT_LIST_HEAD (&mmc_devices);
 	cur_dev_num = 0;
 

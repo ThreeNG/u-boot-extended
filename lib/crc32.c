@@ -187,9 +187,11 @@ uint32_t ZEXPORT crc32_no_comp(uint32_t crc, const Bytef *buf, uInt len)
 #endif
     crc = cpu_to_le32(crc);
     /* Align it */
+    //@ assert \initialized(&len);
     if (((long)b) & 3 && len) {
-	 uint8_t *p = (uint8_t *)b;
+	 uint8_t *p = (uint8_t *)b;	 
 	 do {
+	   //@ assert \initialized(p);	   
 	      DO_CRC(*p++);
 	 } while ((--len) && ((long)p)&3);
 	 b = (uint32_t *)p;
@@ -197,9 +199,13 @@ uint32_t ZEXPORT crc32_no_comp(uint32_t crc, const Bytef *buf, uInt len)
 
     rem_len = len & 3;
     len = len >> 2;
+    //@ assert \initialized(b);
+    //@ assert \initialized(&len);
     for (--b; len; --len) {
+      //@ assert \initialized(b);
 	 /* load data 32 bits wide, xor data 32 bits wide. */
 	 crc ^= *++b; /* use pre increment for speed */
+	 //@ assert \initialized(b);	 
 	 DO_CRC(0);
 	 DO_CRC(0);
 	 DO_CRC(0);
@@ -210,6 +216,7 @@ uint32_t ZEXPORT crc32_no_comp(uint32_t crc, const Bytef *buf, uInt len)
     if (len) {
 	 uint8_t *p = (uint8_t *)(b + 1) - 1;
 	 do {
+	   //@ assert \initialized(p);
 	      DO_CRC(*++p); /* use pre increment for speed */
 	 } while (--len);
     }
@@ -217,8 +224,11 @@ uint32_t ZEXPORT crc32_no_comp(uint32_t crc, const Bytef *buf, uInt len)
     return le32_to_cpu(crc);
 }
 #undef DO_CRC
-
-uint32_t ZEXPORT crc32 (uint32_t crc, const Bytef *p, uInt len)
+/*@ assigns \result \from crc;
+  @ ensures 0 <= \result && \result <= 0xffffffff;
+  @*/
+uint32_t ZEXPORT
+crc32 (uint32_t crc, const Bytef *p, uInt len)
 {
      return crc32_no_comp(crc ^ 0xffffffffL, p, len) ^ 0xffffffffL;
 }

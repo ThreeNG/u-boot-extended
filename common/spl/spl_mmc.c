@@ -18,8 +18,15 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+
 static int mmc_load_image_raw_sector(struct mmc *mmc, unsigned long sector)
 {
+#ifndef CONFIG_MIN_BOOT
+	/* for some reason I need to pad out this function so it
+	 is the same length as the original otherwise booting fails
+	 even though this function is never directly called no is 
+	 any line in this function ever executed
+	*/
 	unsigned long count;
 	u32 image_size_sectors;
 	struct image_header *header;
@@ -60,6 +67,90 @@ end:
 	}
 
 	return 0;
+#else
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+
+return -1;
+#endif /* ndef CONFIG_MIN_BOOT */
 }
 
 int spl_mmc_get_device_index(u32 boot_device)
@@ -146,10 +237,11 @@ static int mmc_load_image_raw_partition(struct mmc *mmc, int partition)
 #endif
 
 #ifdef CONFIG_SPL_OS_BOOT
+/* #ifndef CONFIG_MIN_BOOT*/
 static int mmc_load_image_raw_os(struct mmc *mmc)
 {
+#ifndef CONFIG_MIN_BOOT
 	unsigned long count;
-
 	count = mmc->block_dev.block_read(
 		mmc->block_dev.dev,
 		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR,
@@ -164,7 +256,11 @@ static int mmc_load_image_raw_os(struct mmc *mmc)
 
 	return mmc_load_image_raw_sector(mmc,
 		CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR);
+#else
+        return -ENOSYS;
+#endif 
 }
+/* #endif  ndef CONFIG_MIN_BOOT */
 #else
 int spl_start_uboot(void)
 {
@@ -252,7 +348,7 @@ int spl_mmc_load_image(u32 boot_device)
 			 * We need to check what the partition is configured to.
 			 * 1 and 2 match up to boot0 / boot1 and 7 is user data
 			 * which is the first physical partition (0).
-			 */
+			 */	
 			part = (mmc->part_config >> 3) & PART_ACCESS_MASK;
 
 			if (part == 7)
@@ -268,13 +364,11 @@ int spl_mmc_load_image(u32 boot_device)
 			/* Fall through */
 	case MMCSD_MODE_RAW:
 		debug("spl: mmc boot mode: raw\n");
-
 		if (!spl_start_uboot()) {
 			err = mmc_load_image_raw_os(mmc);
 			if (!err)
 				return err;
 		}
-
 		err = mmc_load_image_raw_partition(mmc,
 			CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_PARTITION);
 		if (!err)

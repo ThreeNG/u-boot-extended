@@ -5,7 +5,6 @@
  */
 
 #include <common.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 int init_cache_f_r(void)

@@ -15,6 +15,7 @@
 
 #ifndef CONFIG_SPL_DM
 /* Pointer to as well as the global data structure for SPL */
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /*
@@ -49,6 +50,7 @@ void __weak board_init_f(ulong dummy)
  * arg: Pointer to paramter image in RAM
  */
 #ifdef CONFIG_SPL_OS_BOOT
+#ifndef CONFIG_MIN_BOOT
 void __noreturn jump_to_image_linux(void *arg)
 {
 	unsigned long machid = 0xffffffff;
@@ -64,4 +66,5 @@ void __noreturn jump_to_image_linux(void *arg)
 	cleanup_before_linux();
 	image_entry(0, machid, arg);
 }
+#endif
 #endif

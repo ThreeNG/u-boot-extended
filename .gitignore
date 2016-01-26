@@ -83,4 +83,26 @@ GTAGS
 
 *.orig
 *~
-\#*#
+\#*
+.opengrok
+*.\#*
+.cproject
+.project
+0001-omap3_beagle-uEnv.txt-bootz-n-fixes.patch
+.gitignore
+cs_files
+include/config.h
+include/autoconf.mk
+include/autoconf.mk.dep
+scripts/basic/fixdep
+scripts/kconfig/conf
+tools/proftool
+tools/mkimage
+tools/mkenvimage
+tools/fdtgrep
+tools/dumpimage
+tools/gen_eth_addr
+tools/img2srec
+examples/standalone/hello_world.srec
+examples/standalone/hello_world
+configure_bbxm.sh

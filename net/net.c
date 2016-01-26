@@ -107,7 +107,7 @@
 #if defined(CONFIG_CMD_SNTP)
 #include "sntp.h"
 #endif
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /** BOOTP EXTENTIONS **/

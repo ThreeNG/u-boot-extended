@@ -42,7 +42,7 @@
 #ifdef CONFIG_CMD_BDI
 extern int do_bdinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 #endif
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #if defined(CONFIG_IMAGE_FORMAT_LEGACY)

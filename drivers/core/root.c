@@ -20,7 +20,6 @@
 #include <dm/uclass.h>
 #include <dm/util.h>
 #include <linux/list.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 static const struct driver_info root_info = {

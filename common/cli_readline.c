@@ -13,7 +13,7 @@
 #include <bootretry.h>
 #include <cli.h>
 #include <watchdog.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static const char erase_seq[] = "\b \b";	/* erase sequence */

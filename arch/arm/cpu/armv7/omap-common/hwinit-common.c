@@ -19,7 +19,7 @@
 #include <asm/omap_common.h>
 #include <linux/compiler.h>
 #include <asm/system.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 void do_set_mux(u32 base, struct pad_conf_entry const *array, int size)

@@ -71,9 +71,10 @@ end:
 	return (err <= 0);
 }
 
-#ifdef CONFIG_SPL_OS_BOOT
+#if defined(CONFIG_SPL_OS_BOOT)
 int spl_load_image_fat_os(block_dev_desc_t *block_dev, int partition)
 {
+#ifndef CONFIG_MIN_BOOT
 	int err;
 	__maybe_unused char *file;
 
@@ -119,6 +120,60 @@ defaults:
 
 	return spl_load_image_fat(block_dev, partition,
 			CONFIG_SPL_FS_LOAD_KERNEL_NAME);
+#else
+	/* for some reason I need to pad out this function so it
+	 is the same length as the original otherwise booting fails
+	 even though this function is never directly called and no
+	 instruction located in this function is ever executed:
+	 Trying to boot from MMC
+	 spl: mmc init failed with error: 8
+	 SPL: failed to boot from all boot devices
+	 ### ERROR ### Please RESET the board ###
+	*/
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	return -1;
+#endif /* !defined(CONFIG_MIN_BOOT)*/
 }
 #else
 int spl_load_image_fat_os(block_dev_desc_t *block_dev, int partition)

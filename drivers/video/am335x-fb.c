@@ -96,6 +96,7 @@ struct am335x_lcdhw {
 };
 
 static struct am335x_lcdhw *lcdhw = (void *)LCD_CNTL_BASE;
+
 DECLARE_GLOBAL_DATA_PTR;
 
 int lcd_get_size(int *line_length)

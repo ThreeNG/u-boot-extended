@@ -25,6 +25,8 @@
  * get_sys_clk_speed() - determine reference oscillator speed
  *                       based on known 32kHz clock and gptimer.
  *****************************************************************************/
+#define ___SKIP_get_osc_clk_speed_spl_FUNC
+#define ___SKIP_get_osc_clk_speed_main_FUNC
 u32 get_osc_clk_speed(void)
 {
 	u32 start, cstart, cend, cdiff, cdiv, val;
@@ -725,6 +727,8 @@ void ehci_clocks_enable(void)
  *****************************************************************************/
 void per_clocks_enable(void)
 {
+#define ___SKIP_per_clocks_enable0_spl_START
+#define ___SKIP_per_clocks_enable0_main_START  
 	struct prcm *prcm_base = (struct prcm *)PRCM_BASE;
 
 	/* Enable GP2 timer. */
@@ -779,10 +783,12 @@ void per_clocks_enable(void)
 #endif
 	/* Enable the ICLK for 32K Sync Timer as its used in udelay */
 	setbits_le32(&prcm_base->iclken_wkup, 0x00000004);
-
+#define ___SKIP_per_clocks_enable0_spl_END
+#define ___SKIP_per_clocks_enable0_main_END
 	if (get_cpu_family() != CPU_AM35XX)
+#define ___SKIP_per_clocks_enable2_spl_START
+#define ___SKIP_per_clocks_enable2_main_START
 		out_le32(&prcm_base->fclken_iva2, FCK_IVA2_ON);
-
 	out_le32(&prcm_base->fclken1_core, FCK_CORE1_ON);
 	out_le32(&prcm_base->iclken1_core, ICK_CORE1_ON);
 	out_le32(&prcm_base->iclken2_core, ICK_CORE2_ON);
@@ -790,9 +796,15 @@ void per_clocks_enable(void)
 	out_le32(&prcm_base->iclken_wkup, ICK_WKUP_ON);
 	out_le32(&prcm_base->fclken_dss, FCK_DSS_ON);
 	out_le32(&prcm_base->iclken_dss, ICK_DSS_ON);
-	if (get_cpu_family() != CPU_AM35XX) {
-		out_le32(&prcm_base->fclken_cam, FCK_CAM_ON);
+#define ___SKIP_per_clocks_enable2_spl_END
+#define ___SKIP_per_clocks_enable2_main_END
+	if (get_cpu_family() != CPU_AM35XX) {	  
+#define ___SKIP_per_clocks_enable3_spl_START
+#define ___SKIP_per_clocks_enable3_main_START
+	        out_le32(&prcm_base->fclken_cam, FCK_CAM_ON);
 		out_le32(&prcm_base->iclken_cam, ICK_CAM_ON);
+#define ___SKIP_per_clocks_enable3_spl_END
+#define ___SKIP_per_clocks_enable3_main_END
 	}
 
 	sdelay(1000);

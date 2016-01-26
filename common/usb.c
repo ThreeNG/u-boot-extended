@@ -26,6 +26,7 @@
  *
  * For each transfer (except "Interrupt") we wait for completion.
  */
+
 #include <common.h>
 #include <command.h>
 #include <dm.h>
@@ -218,7 +219,7 @@ int usb_control_msg(struct usb_device *dev, unsigned int pipe,
 			unsigned short value, unsigned short index,
 			void *data, unsigned short size, int timeout)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(struct devrequest, setup_packet, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(struct devrequest, setup_packet, 1);
 	int err;
 
 	if ((timeout == 0) && (!asynch_allowed)) {
@@ -804,7 +805,7 @@ static int usb_string_sub(struct usb_device *dev, unsigned int langid,
  */
 int usb_string(struct usb_device *dev, int index, char *buf, size_t size)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, mybuf, USB_BUFSIZ);
+  ALLOC_CACHE_ALIGN_BUFFER(unsigned char, mybuf, USB_BUFSIZ);
 	unsigned char *tbuf;
 	int err;
 	unsigned int u, idx;

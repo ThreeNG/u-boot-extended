@@ -27,6 +27,7 @@
 /*
  * Global data (for the gd->bd)
  */
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static int fdt_valid(struct fdt_header **blobp);

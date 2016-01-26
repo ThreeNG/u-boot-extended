@@ -8,7 +8,7 @@
 #include <common.h>
 #include <command.h>
 #include <cmd_spl.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static const char **subcmd_list[] = {

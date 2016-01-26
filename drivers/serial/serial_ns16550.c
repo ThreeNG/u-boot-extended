@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
-
+#define ___FRAMAC_GD_spl_PATCH
 #include <common.h>
 #include <linux/compiler.h>
 
@@ -134,7 +134,9 @@ static void _serial_putc_raw(const char c, const int port)
 
 static void _serial_puts(const char *s, const int port)
 {
+  //@ loop pragma UNROLL 1;
 	while (*s) {
+#define ___FRAMAC_serial_putc_spl_PATCH	  
 		_serial_putc(*s++, port);
 	}
 }

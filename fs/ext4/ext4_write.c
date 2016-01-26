@@ -21,7 +21,6 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-
 #include <common.h>
 #include <memalign.h>
 #include <linux/stat.h>
@@ -840,6 +839,7 @@ int ext4fs_write(const char *fname, unsigned char *buffer,
 	unsigned int inodes_per_block;
 	unsigned int ibmap_idx;
 	struct ext_filesystem *fs = get_fs();
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(char, filename, 256);
 	memset(filename, 0x00, 256);
 

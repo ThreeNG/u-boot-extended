@@ -18,6 +18,8 @@
  *
  *  not inline to increase chances its in cache when called
  *************************************************************/
+#define ___SKIP_sdelay_spl_FUNC
+#define ___SKIP_sdelay_main_FUNC
 void sdelay(unsigned long loops)
 {
 	__asm__ volatile ("1:\n" "subs %0, %1, #1\n"
@@ -28,10 +30,13 @@ void sdelay(unsigned long loops)
  * wait_on_value() - common routine to allow waiting for changes in
  *   volatile regs.
  *********************************************************************/
+#define ___SKIP_wait_on_value_spl_FUNC
+#define ___SKIP_wait_on_value_main_FUNC
 u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
 		  u32 bound)
 {
 	u32 i = 0, val;
+	//@ loop pragma UNROLL 0;	
 	do {
 		++i;
 		val = readl((u32)read_addr) & read_bit_mask;

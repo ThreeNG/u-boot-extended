@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <usb.h>
 #include <fat.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_USB_STORAGE

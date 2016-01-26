@@ -9,6 +9,7 @@
 #include <environment.h>
 
 #if defined(CONFIG_NEEDS_MANUAL_RELOC)
+
 DECLARE_GLOBAL_DATA_PTR;
 #endif
 

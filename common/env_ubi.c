@@ -37,7 +37,7 @@ static unsigned char env_flags;
 
 int saveenv(void)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(env_t, env_new, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(env_t, env_new, 1);
 	int ret;
 
 	ret = env_export(env_new);
@@ -110,8 +110,8 @@ int saveenv(void)
 #ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
 void env_relocate_spec(void)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(char, env1_buf, CONFIG_ENV_SIZE);
-	ALLOC_CACHE_ALIGN_BUFFER(char, env2_buf, CONFIG_ENV_SIZE);
+  ALLOC_CACHE_ALIGN_BUFFER(char, env1_buf, CONFIG_ENV_SIZE);
+  ALLOC_CACHE_ALIGN_BUFFER(char, env2_buf, CONFIG_ENV_SIZE);
 	int crc1_ok = 0, crc2_ok = 0;
 	env_t *ep, *tmp_env1, *tmp_env2;
 
@@ -172,7 +172,7 @@ void env_relocate_spec(void)
 #else /* ! CONFIG_SYS_REDUNDAND_ENVIRONMENT */
 void env_relocate_spec(void)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(char, buf, CONFIG_ENV_SIZE);
+  ALLOC_CACHE_ALIGN_BUFFER(char, buf, CONFIG_ENV_SIZE);
 
 	if (ubi_part(CONFIG_ENV_UBI_PART, NULL)) {
 		printf("\n** Cannot find mtd partition \"%s\"\n",

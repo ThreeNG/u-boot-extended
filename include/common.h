@@ -722,6 +722,7 @@ void	external_interrupt (struct pt_regs *);
 void	irq_install_handler(int, interrupt_handler_t *, void *);
 void	irq_free_handler   (int);
 void	reset_timer	   (void);
+
 ulong	get_timer	   (ulong base);
 
 /* Return value of monotonic microsecond timer */

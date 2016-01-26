@@ -27,7 +27,7 @@
 static int skip_atoi(const char **s)
 {
 	int i = 0;
-
+	//@ loop pragma UNROLL 1;
 	while (is_digit(**s))
 		i = i * 10 + *((*s)++) - '0';
 
@@ -124,6 +124,7 @@ static char *put_dec_full(char *buf, unsigned q)
 /* No inlining helps gcc to use registers better */
 static noinline char *put_dec(char *buf, uint64_t num)
 {
+	//@ loop pragma UNROLL 1;  
 	while (1) {
 		unsigned rem;
 		if (num < 100000)
@@ -194,6 +195,7 @@ static char *number(char *buf, char *end, u64 num,
 
 	/* generate full string in tmp[], in reverse order */
 	i = 0;
+	//@ assert \initialized(&num);
 	if (num == 0)
 		tmp[i++] = '0';
 	/* Generic code, for any base:
@@ -207,7 +209,7 @@ static char *number(char *buf, char *end, u64 num,
 
 		if (base == 16)
 			shift = 4;
-
+		//@ loop pragma UNROLL 1;
 		do {
 			tmp[i++] = (digits[((unsigned char)num) & mask]
 					| locase);
@@ -243,13 +245,17 @@ static char *number(char *buf, char *end, u64 num,
 			ADDCH(buf, c);
 	}
 	/* hmm even more zero padding? */
+	//@ loop pragma UNROLL 1;	
 	while (i <= --precision)
 		ADDCH(buf, '0');
 	/* actual digits of result */
+	//@ loop pragma UNROLL 1;	
 	while (--i >= 0)
 		ADDCH(buf, tmp[i]);
 	/* trailing space padding */
+	//@ loop pragma UNROLL 1;	
 	while (--size >= 0)
+
 		ADDCH(buf, ' ');
 	return buf;
 }
@@ -265,10 +271,14 @@ static char *string(char *buf, char *end, char *s, int field_width,
 	len = strnlen(s, precision);
 
 	if (!(flags & LEFT))
+	  //@ loop pragma UNROLL 1;
 		while (len < field_width--)
 			ADDCH(buf, ' ');
+	//@ loop pragma UNROLL 1;
 	for (i = 0; i < len; ++i)
+#define ___LONGWRITE_string_main_BREAK
 		ADDCH(buf, *s++);
+	//@ loop pragma UNROLL 1;	
 	while (len < field_width--)
 		ADDCH(buf, ' ');
 	return buf;
@@ -449,7 +459,6 @@ static int vsnprintf_internal(char *buf, size_t size, const char *fmt,
 	}
 #endif
 	str = buf;
-
 	for (; *fmt ; ++fmt) {
 		if (*fmt != '%') {
 			ADDCH(str, *fmt);
@@ -525,8 +534,8 @@ repeat:
 		switch (*fmt) {
 		case 'c':
 			if (!(flags & LEFT)) {
-				while (--field_width > 0)
-					ADDCH(str, ' ');
+			  while (--field_width > 0)
+			    ADDCH(str, ' ');
 			}
 			ADDCH(str, (unsigned char) va_arg(args, int));
 			while (--field_width > 0)
@@ -605,8 +614,7 @@ repeat:
 			if (flags & SIGN)
 				num = (signed int) num;
 		}
-		str = number(str, end, num, base, field_width, precision,
-			     flags);
+		str = number(str, end, num, base, field_width, precision, flags);
 	}
 
 #ifdef CONFIG_SYS_VSNPRINTF
@@ -749,6 +757,7 @@ char *simple_itoa(ulong i)
 	char *p = &local[21];
 
 	*p-- = '\0';
+	//@ loop pragma UNROLL 1;
 	do {
 		*p-- = '0' + i % 10;
 		i /= 10;

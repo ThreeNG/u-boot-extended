@@ -10,7 +10,7 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <asm/io.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 void *malloc_simple(size_t bytes)

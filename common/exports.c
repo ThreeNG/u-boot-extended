@@ -2,7 +2,7 @@
 #include <exports.h>
 #include <spi.h>
 #include <i2c.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 __attribute__((unused)) static void dummy(void)

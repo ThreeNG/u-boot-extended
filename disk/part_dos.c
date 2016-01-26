@@ -52,7 +52,6 @@ static void print_one_part(dos_partition_t *p, int ext_part_sector,
 {
 	int lba_start = ext_part_sector + le32_to_int (p->start4);
 	int lba_size  = le32_to_int (p->size4);
-
 	printf("%3d\t%-10d\t%-10d\t%08x-%02x\t%02x%s%s\n",
 		part_num, lba_start, lba_size, disksig, part_num, p->sys_ind,
 		(is_extended(p->sys_ind) ? " Extd" : ""),
@@ -63,12 +62,16 @@ static int test_block_type(unsigned char *buffer)
 {
 	int slot;
 	struct dos_partition *p;
-
+	//@ assert \initialized(buffer+(0x1fe..0x1ff));
 	if((buffer[DOS_PART_MAGIC_OFFSET + 0] != 0x55) ||
 	    (buffer[DOS_PART_MAGIC_OFFSET + 1] != 0xaa) ) {
 		return (-1);
 	} /* no DOS Signature at all */
 	p = (struct dos_partition *)&buffer[DOS_PART_TBL_OFFSET];
+	//@ assert \valid(p);
+	//@ assert \initialized(p);
+	//@ assert \initialized(buffer+0x36);
+	//@ assert \initialized(buffer+0x52);		
 	for (slot = 0; slot < 3; slot++) {
 		if (p->boot_ind != 0 && p->boot_ind != 0x80) {
 			if (!slot &&
@@ -88,7 +91,9 @@ static int test_block_type(unsigned char *buffer)
 
 int test_part_dos (block_dev_desc_t *dev_desc)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
+#define ___FRAMAC_align_buffer_dos_spl_PATCH
+  ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
+  //@ assert \valid_function(dev_desc->block_read);
 
 	if (dev_desc->block_read(dev_desc->dev, 0, 1, (ulong *) buffer) != 1)
 		return -1;
@@ -105,7 +110,8 @@ static void print_partition_extended(block_dev_desc_t *dev_desc,
 				     int ext_part_sector, int relative,
 				     int part_num, unsigned int disksig)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
+#define ___FRAMAC_align_buffer_dos_spl_PATCH
+  ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
 	dos_partition_t *pt;
 	int i;
 
@@ -163,12 +169,37 @@ static void print_partition_extended(block_dev_desc_t *dev_desc,
 
 /*  Print a partition that is relative to its Extended partition table
  */
+// ensures info->name == "xx00";
+// ensures info->type == "U-Boot";
+
+
+//@ ghost ulong b = 512;
+//@ ghost lbaint_t s = 512;
+//@ ghost lbaint_t sz = 512;
+//@ ghost lbaint_t z = 0;
+//@ ghost int boot = 0;
+//@ ghost int r = 0;
+//@ ghost int i = 1;
+/*@
+  @ assigns \result \from r;
+  @ assigns info->blksz \from b;
+  @ ensures info->blksz == 512;
+  @ assigns info->start \from s;
+  @ ensures info->start == 0;
+  @ assigns info->size \from sz;
+  @ ensures info->size == 512;
+  @ assigns info->bootable \from boot;
+  @ ensures info->bootable == 1;
+  @ ensures \result == 0;
+  @ ensures part_num == 1;
+  @*/
 static int get_partition_info_extended (block_dev_desc_t *dev_desc, int ext_part_sector,
 				 int relative, int part_num,
 				 int which_part, disk_partition_t *info,
 				 unsigned int disksig)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
+#define ___FRAMAC_align_buffer_dos_spl_PATCH
+        ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, dev_desc->blksz);
 	dos_partition_t *pt;
 	int i;
 	int dos_type;
@@ -251,10 +282,8 @@ static int get_partition_info_extended (block_dev_desc_t *dev_desc, int ext_part
 	for (i = 0; i < 4; i++, pt++) {
 		if (is_extended (pt->sys_ind)) {
 			int lba_start = le32_to_int (pt->start4) + relative;
-
-			return get_partition_info_extended (dev_desc, lba_start,
-				 ext_part_sector == 0 ? lba_start : relative,
-				 part_num, which_part, info, disksig);
+#define ___FRAMAC_return_zero_spl_PATCH 
+			return get_partition_info_extended (dev_desc, lba_start, ext_part_sector == 0 ? lba_start : relative, part_num, which_part, info, disksig);							    							  
 		}
 	}
 

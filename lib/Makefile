@@ -68,7 +68,13 @@ obj-y += hashtable.o
 obj-y += errno.o
 obj-y += display_options.o
 obj-$(CONFIG_BCH) += bch.o
+ifndef CONFIG_MIN_BOOT
 obj-y += crc32.o
+else
+ifndef CONFIG_SPL_BOOT
+obj-y += crc32.o
+endif
+endif
 obj-y += ctype.o
 obj-y += div64.o
 obj-y += hang.o

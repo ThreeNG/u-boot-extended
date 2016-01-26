@@ -12,7 +12,7 @@
 #include <cros_ec.h>
 #include <dm.h>
 #include <errno.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 struct cros_ec_dev *board_get_cros_ec_dev(void)

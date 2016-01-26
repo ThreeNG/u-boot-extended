@@ -30,7 +30,7 @@
 #include <linux/stddef.h>
 #include <search.h>
 #include <errno.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_SYS_NVRAM_ACCESS_ROUTINE

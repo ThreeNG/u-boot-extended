@@ -622,6 +622,7 @@ static inline int usb_endpoint_is_isoc_out(
  */
 static inline int usb_endpoint_maxp(const struct usb_endpoint_descriptor *epd)
 {
+#define ___FRAMAC_usb_maxp_spl_PATCH
 	return __le16_to_cpu(get_unaligned(&epd->wMaxPacketSize));
 }
 

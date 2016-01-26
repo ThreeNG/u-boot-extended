@@ -39,12 +39,12 @@ include $(srctree)/config.mk
 include $(srctree)/arch/$(ARCH)/Makefile
 
 # Enable garbage collection of un-used sections for SPL
-KBUILD_CFLAGS += -ffunction-sections -fdata-sections
+KBUILD_CFLAGS += -ffunction-sections -fdata-sections -save-temps -C
 LDFLAGS_FINAL += --gc-sections
 
 # FIX ME
 cpp_flags := $(KBUILD_CPPFLAGS) $(PLATFORM_CPPFLAGS) $(UBOOTINCLUDE) \
-							$(NOSTDINC_FLAGS)
+							$(NOSTDINC_FLAGS) 
 
 HAVE_VENDOR_COMMON_LIB = $(if $(wildcard $(srctree)/board/$(VENDOR)/common/Makefile),y,n)
 
@@ -163,6 +163,7 @@ endif
 
 all:	$(ALL-y)
 
+
 quiet_cmd_cat = CAT     $@
 cmd_cat = cat $(filter-out $(PHONY), $^) > $@
 
@@ -272,3 +273,7 @@ FORCE:
 # Declare the contents of the .PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)
+
+frama_c_tweaks.i: frama_c_tweaks.c FORCE
+	$(CPP) $(cpp_flags) -C -o $@ $<
+

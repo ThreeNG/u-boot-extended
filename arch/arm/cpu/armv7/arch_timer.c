@@ -8,7 +8,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <div64.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 int timer_init(void)

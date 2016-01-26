@@ -12,7 +12,7 @@
 #ifdef CONFIG_CPU_V7M
 #include <asm/armv7m.h>
 #endif
-
+#include <typed_memory_macros.h>
 /*
  * This file handles the target-independent stages of the U-Boot
  * start-up where a C runtime environment is needed. Its entry point
@@ -84,11 +84,18 @@ ENTRY(_main)
 #endif
 	mov	r0, sp
 	bl	board_init_f_mem
+#ifdef CONFIG_BEAGLEXM
+ENDPROC(_main)
+ENTRY(board_init_f_mem_finish)
+#endif	
 	mov	sp, r0
 
 	mov	r0, #0
 	bl	board_init_f
-
+#ifdef CONFIG_BEAGLEXM
+ENDPROC(board_init_f_mem_finish)
+ENTRY(_main_finish)
+#endif
 #if ! defined(CONFIG_SPL_BUILD)
 
 /*
@@ -134,6 +141,11 @@ here:
 	cmp	r0, #0
 	movne	sp, r0
 # endif
+#ifdef CONFIG_BEAGLEXM
+	b clear_bss
+ENDPROC(_main_finish)
+ENTRY(clear_bss)
+#endif
 	ldr	r0, =__bss_start	/* this is auto-relocated! */
 
 #ifdef CONFIG_USE_ARCH_MEMSET
@@ -150,11 +162,17 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 #if defined(CONFIG_CPU_V7M)
 	itt	lo
 #endif
+#define ___LONGWRITE_bss_spl_BREAK			
+#define ___LONGWRITE_bss_main_BREAK		  		
 	strlo	r2, [r0]		/* clear 32-bit BSS word */
 	addlo	r0, r0, #4		/* move to next */
 	blo	clbss_l
+#define ___PHASE_BSSCLEARED_spl_BEGIN 
 #endif
-
+#ifdef CONFIG_VALIDATE	
+EVENT_CLEAR_BSS // and assert this.
+#endif // #define CONFIG_VALIDATE
+	
 #if ! defined(CONFIG_SPL_BUILD)
 	bl coloured_LED_init
 	bl red_led_on
@@ -167,5 +185,8 @@ clbss_l:cmp	r0, r1			/* while not at end of BSS */
 
 	/* we should not return here. */
 #endif
-
+#ifdef CONFIG_BEAGLEXM
+ENDPROC(clear_bss)
+#else	
 ENDPROC(_main)
+#endif

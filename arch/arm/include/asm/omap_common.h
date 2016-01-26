@@ -712,6 +712,7 @@ static inline u8 is_dra72x(void)
 #define OMAP_SRAM_SCRATCH_BOOT_PARAMS	(SRAM_SCRATCH_SPACE_ADDR + 0x24)
 #define OMAP5_SRAM_SCRATCH_SPACE_END	(SRAM_SCRATCH_SPACE_ADDR + 0x28)
 
+
 /* Boot parameters */
 #define DEVICE_DATA_OFFSET	0x18
 #define BOOT_MODE_OFFSET	0x8

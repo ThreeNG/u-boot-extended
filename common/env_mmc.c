@@ -139,7 +139,7 @@ static unsigned char env_flags;
 
 int saveenv(void)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(env_t, env_new, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(env_t, env_new, 1);
 	struct mmc *mmc = find_mmc_device(CONFIG_SYS_MMC_ENV_DEV);
 	u32	offset;
 	int	ret, copy = 0;
@@ -200,7 +200,6 @@ static inline int read_env(struct mmc *mmc, unsigned long size,
 
 	blk_start	= ALIGN(offset, mmc->read_bl_len) / mmc->read_bl_len;
 	blk_cnt		= ALIGN(size, mmc->read_bl_len) / mmc->read_bl_len;
-
 	n = mmc->block_dev.block_read(dev, blk_start, blk_cnt, (uchar *)buffer);
 
 	return (n == blk_cnt) ? 0 : -1;
@@ -298,7 +297,7 @@ err:
 void env_relocate_spec(void)
 {
 #if !defined(ENV_IS_EMBEDDED)
-	ALLOC_CACHE_ALIGN_BUFFER(char, buf, CONFIG_ENV_SIZE);
+  ALLOC_CACHE_ALIGN_BUFFER(char, buf, CONFIG_ENV_SIZE);
 	struct mmc *mmc;
 	u32 offset;
 	int ret;

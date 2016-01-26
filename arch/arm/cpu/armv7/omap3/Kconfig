@@ -1,3 +1,4 @@
+
 if OMAP34XX
 
 choice
@@ -18,6 +19,7 @@ config TARGET_OMAP3_BEAGLE
 	select DM
 	select DM_SERIAL
 	select DM_GPIO
+
 
 config TARGET_CM_T35
 	bool "CompuLab CM-T3530 and CM-T3730 boards"

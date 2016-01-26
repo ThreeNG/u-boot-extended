@@ -12,7 +12,7 @@
 #include <post.h>
 #include <linux/compiler.h>
 #include <errno.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct serial_device *serial_devices;
@@ -80,6 +80,7 @@ static int on_baudrate(const char *name, const char *value, enum env_op op,
 		udelay(50000);
 
 		if ((flags & H_INTERACTIVE) != 0)
+		  //@ loop pragma UNROLL 0;		  
 			while (1) {
 				if (getc() == '\r')
 					break;
@@ -416,6 +417,7 @@ static struct serial_device *get_current(void)
 int serial_init(void)
 {
 	gd->flags |= GD_FLG_SERIAL_READY;
+	//#define ___FRAMAC_serial_spl_PATCH
 	return get_current()->start();
 }
 
@@ -431,6 +433,7 @@ int serial_init(void)
  */
 void serial_setbrg(void)
 {
+  //#define ___FRAMAC_serial_spl_PATCH
 	get_current()->setbrg();
 }
 
@@ -447,6 +450,7 @@ void serial_setbrg(void)
  */
 int serial_getc(void)
 {
+  //#define ___FRAMAC_serial_spl_PATCH
 	return get_current()->getc();
 }
 
@@ -462,6 +466,7 @@ int serial_getc(void)
  */
 int serial_tstc(void)
 {
+  //#define ___FRAMAC_serial_spl_PATCH
 	return get_current()->tstc();
 }
 
@@ -478,6 +483,7 @@ int serial_tstc(void)
  */
 void serial_putc(const char c)
 {
+  //#define ___FRAMAC_serial_spl_PATCH
 	get_current()->putc(c);
 }
 
@@ -496,6 +502,7 @@ void serial_putc(const char c)
  */
 void serial_puts(const char *s)
 {
+  //#define ___FRAMAC_serial_spl_PATCH
 	get_current()->puts(s);
 }
 
@@ -514,7 +521,9 @@ void serial_puts(const char *s)
 void default_serial_puts(const char *s)
 {
 	struct serial_device *dev = get_current();
+	//@ loop pragma UNROLL 0;
 	while (*s)
+	  //#define ___FRAMAC_serial_spl_PATCH
 		dev->putc(*s++);
 }
 
@@ -558,6 +567,7 @@ int uart_post_test(int flags)
 			goto done;
 
 		/* Consume anything that happens to be queued */
+		//@ loop pragma UNROLL 0;		
 		while (serial_tstc())
 			serial_getc();
 

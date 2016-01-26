@@ -180,7 +180,6 @@
 	!(defined(CONFIG_QSPI_BOOT) && defined(CONFIG_AM43XX))
 #define CONFIG_SPL_FRAMEWORK
 #define CONFIG_SPL_OS_BOOT
-
 /*
  * Place the image at the start of the ROM defined image space (per
  * CONFIG_SPL_TEXT_BASE and we limit our size to the ROM-defined
@@ -232,7 +231,6 @@
 #define CONFIG_SPL_LIBDISK_SUPPORT
 #define CONFIG_SPL_MMC_SUPPORT
 #define CONFIG_SPL_FAT_SUPPORT
-#define CONFIG_SPL_EXT_SUPPORT
 #endif
 
 #define CONFIG_SYS_THUMB_BUILD
@@ -283,5 +281,6 @@
 #endif
 
 #include <config_distro_defaults.h>
+#define __FRAMAC_declare_boot_params_spl_PATCH
 
 #endif	/* __CONFIG_TI_ARMV7_COMMON_H__ */

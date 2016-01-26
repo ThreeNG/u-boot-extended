@@ -128,6 +128,7 @@
 #endif
 
 #ifdef __U_BOOT__
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define EXIT_SUCCESS 0

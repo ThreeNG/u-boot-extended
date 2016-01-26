@@ -19,8 +19,15 @@
  * the user one needs to catch the bootstage_error (see show_boot_progress())
  * in the board code.
  */
+
+/*@ terminates \false;
+  ensures \false;
+*/
+
 void hang(void)
 {
+#define ___STAGEINFO_fail_spl_EXIT
+#define ___STAGEINFO_fail_main_EXIT  
 #if !defined(CONFIG_SPL_BUILD) || (defined(CONFIG_SPL_LIBCOMMON_SUPPORT) && \
 		defined(CONFIG_SPL_SERIAL_SUPPORT))
 	puts("### ERROR ### Please RESET the board ###\n");

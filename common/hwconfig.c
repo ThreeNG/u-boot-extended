@@ -23,7 +23,7 @@
 #include <assert.h>
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif /* HWCONFIG_TEST */
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static const char *hwconfig_parse(const char *opts, size_t maxlen,

@@ -160,6 +160,7 @@ int usb_stor_info(void)
 static unsigned int usb_get_max_lun(struct us_data *us)
 {
 	int len;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, result, 1);
 	len = usb_control_msg(us->pusb_dev,
 			      usb_rcvctrlpipe(us->pusb_dev, 0),
@@ -470,6 +471,7 @@ static int usb_stor_BBB_comdat(ccb *srb, struct us_data *us)
 	int actlen;
 	int dir_in;
 	unsigned int pipe;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(struct umass_bbb_cbw, cbw, 1);
 
 	dir_in = US_DIRECTION(srb->cmd[0]);
@@ -646,6 +648,7 @@ static int usb_stor_BBB_transport(ccb *srb, struct us_data *us)
 	int dir_in;
 	int actlen, data_actlen;
 	unsigned int pipe, pipein, pipeout;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(struct umass_bbb_csw, csw, 1);
 #ifdef BBB_XPORT_TRACE
 	unsigned char *ptr;
@@ -1291,7 +1294,9 @@ int usb_stor_get_info(struct usb_device *dev, struct us_data *ss,
 		      block_dev_desc_t *dev_desc)
 {
 	unsigned char perq, modi;
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(u32, cap, 2);
+#define ___FRAMAC_align_buffer_spl_PATCH
 	ALLOC_CACHE_ALIGN_BUFFER(u8, usb_stor_buf, 36);
 	u32 capacity, blksz;
 	ccb *pccb = &usb_ccb;

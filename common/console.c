@@ -16,7 +16,7 @@
 #include <stdio_dev.h>
 #include <exports.h>
 #include <environment.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static int on_console(const char *name, const char *value, enum env_op op,
@@ -262,7 +262,8 @@ static inline void console_puts_noserial(int file, const char *s)
 
 static inline void console_puts(int file, const char *s)
 {
-	stdio_devices[file]->puts(stdio_devices[file], s);
+
+  stdio_devices[file]->puts(stdio_devices[file], s);
 }
 
 static inline void console_printdevs(int file)
@@ -283,7 +284,6 @@ int serial_printf(const char *fmt, ...)
 	va_list args;
 	uint i;
 	char printbuffer[CONFIG_SYS_PBSIZE];
-
 	va_start(args, fmt);
 
 	/* For this to work, printbuffer must be larger than
@@ -291,7 +291,6 @@ int serial_printf(const char *fmt, ...)
 	 */
 	i = vscnprintf(printbuffer, sizeof(printbuffer), fmt, args);
 	va_end(args);
-
 	serial_puts(printbuffer);
 	return i;
 }
@@ -352,7 +351,6 @@ int fprintf(int file, const char *fmt, ...)
 	va_list args;
 	uint i;
 	char printbuffer[CONFIG_SYS_PBSIZE];
-
 	va_start(args, fmt);
 
 	/* For this to work, printbuffer must be larger than
@@ -360,6 +358,7 @@ int fprintf(int file, const char *fmt, ...)
 	 */
 	i = vscnprintf(printbuffer, sizeof(printbuffer), fmt, args);
 	va_end(args);
+
 
 	/* Send to desired file */
 	fputs(file, printbuffer);
@@ -499,6 +498,7 @@ void putc(const char c)
 #endif
 
 	if (!gd->have_console)
+#define ___FRAMAC_noreturn_spl_PATCH	  
 		return pre_console_putc(c);
 
 	if (gd->flags & GD_FLG_DEVINIT) {
@@ -546,6 +546,7 @@ void puts(const char *s)
 #endif
 
 	if (!gd->have_console)
+#define ___FRAMAC_noreturn_spl_PATCH	  
 		return pre_console_puts(s);
 
 	if (gd->flags & GD_FLG_DEVINIT) {
@@ -657,6 +658,7 @@ void clear_ctrlc(void)
 char	screen[1024];
 char *cursor = screen;
 int once = 0;
+
 inline void dbg(const char *fmt, ...)
 {
 	va_list	args;

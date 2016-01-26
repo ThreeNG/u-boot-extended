@@ -108,8 +108,9 @@ data_abort:
 not_used:
 irq:
 fiq:
-
 1:
+//#define ___STAGEINFO_fail_spl_EXIT
+//#define ___STAGEINFO_fail_main_EXIT	
 	bl	1b			/* hang and never return */
 
 #else	/* !CONFIG_SPL_BUILD */

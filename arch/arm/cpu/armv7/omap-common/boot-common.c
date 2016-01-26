@@ -28,18 +28,18 @@ __weak u32 omap_sys_boot_device(void)
 
 void save_omap_boot_params(void)
 {
-	u32 boot_params = *((u32 *)OMAP_SRAM_SCRATCH_BOOT_PARAMS);
-	struct omap_boot_parameters *omap_boot_params;
-	int sys_boot_device = 0;
-	u32 boot_device;
-	u32 boot_mode;
+  u32 boot_params = *((u32 *)OMAP_SRAM_SCRATCH_BOOT_PARAMS);
+    struct omap_boot_parameters *omap_boot_params;
+    int sys_boot_device = 0;
+    u32 boot_device;
+    u32 boot_mode;
 
 	if ((boot_params < NON_SECURE_SRAM_START) ||
 	    (boot_params > NON_SECURE_SRAM_END))
 		return;
 
 	omap_boot_params = (struct omap_boot_parameters *)boot_params;
-
+	
 	boot_device = omap_boot_params->boot_device;
 	boot_mode = MMCSD_MODE_UNDEFINED;
 

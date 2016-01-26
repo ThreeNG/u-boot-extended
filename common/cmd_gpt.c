@@ -358,7 +358,8 @@ static int gpt_default(block_dev_desc_t *blk_dev_desc, const char *str_part)
 
 static int gpt_verify(block_dev_desc_t *blk_dev_desc, const char *str_part)
 {
-	ALLOC_CACHE_ALIGN_BUFFER_PAD(gpt_header, gpt_head, 1,
+
+  ALLOC_CACHE_ALIGN_BUFFER_PAD(gpt_header, gpt_head, 1,
 				     blk_dev_desc->blksz);
 	disk_partition_t *partitions = NULL;
 	gpt_entry *gpt_pte = NULL;

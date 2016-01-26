@@ -11,7 +11,7 @@
 #include <libfdt.h>
 #include <malloc.h>
 #include <vxworks.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static int do_bootm_standalone(int flag, int argc, char * const argv[],
@@ -477,6 +477,7 @@ int boot_selected_os(int argc, char * const argv[], int state,
 		     bootm_headers_t *images, boot_os_fn *boot_fn)
 {
 	arch_preboot_os();
+#define ___STAGEINFO_success_main_EXIT	
 	boot_fn(state, argc, argv, images);
 
 	/* Stand-alone may return when 'autostart' is 'no' */

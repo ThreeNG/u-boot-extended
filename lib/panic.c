@@ -16,6 +16,9 @@
 
 static void panic_finish(void) __attribute__ ((noreturn));
 
+/*@ terminates \false;
+  @ ensures \false;
+*/
 static void panic_finish(void)
 {
 	putc('\n');

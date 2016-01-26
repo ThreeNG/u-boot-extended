@@ -9,7 +9,16 @@ extra-y	:= start.o
 
 obj-y	+= cache_v7.o
 
-obj-y	+= cpu.o cp15.o
+ifndef CONFIG_MIN_BOOT
+obj-y	+= cpu.o
+else
+ifndef CONFIG_SPL_BUILD
+# don't include in bbxm's spl
+obj-y	+= cpu.o
+endif
+endif
+
+obj-y   += cp15.o
 obj-y	+= syslib.o
 
 ifneq ($(CONFIG_AM43XX)$(CONFIG_AM33XX)$(CONFIG_OMAP44XX)$(CONFIG_OMAP54XX)$(CONFIG_TEGRA)$(CONFIG_MX6)$(CONFIG_MX7)$(CONFIG_TI81XX)$(CONFIG_AT91FAMILY)$(CONFIG_SUNXI)$(CONFIG_ARCH_SOCFPGA),)

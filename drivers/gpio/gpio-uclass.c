@@ -11,7 +11,7 @@
 #include <malloc.h>
 #include <asm/gpio.h>
 #include <linux/ctype.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /**

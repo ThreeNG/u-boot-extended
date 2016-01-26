@@ -15,7 +15,6 @@
 #include <watchdog.h>
 #include <dm/lists.h>
 #include <dm/device-internal.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 /*

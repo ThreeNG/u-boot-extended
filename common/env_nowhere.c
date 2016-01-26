@@ -12,7 +12,7 @@
 #include <command.h>
 #include <environment.h>
 #include <linux/stddef.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 env_t *env_ptr;

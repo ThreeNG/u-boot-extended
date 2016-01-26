@@ -28,6 +28,11 @@
 #include <asm/omap_common.h>
 #include <linux/compiler.h>
 
+#ifdef CONFIG_BEAGLEXM
+int _main_finish();
+int _main();
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /* Declarations */
@@ -178,6 +183,10 @@ void try_unlock_memory(void)
  * Description: Does early system init of muxing and clocks.
  *              - Called path is with SRAM stack.
  *****************************************************************************/
+/*@ terminates \false;
+  @ ensures \false;
+*/
+#define ___FRAMAC_s_init_spl_SAMPLE_ENTRYPOINT
 void s_init(void)
 {
 	watchdog_init();
@@ -199,15 +208,23 @@ void s_init(void)
 #ifdef CONFIG_USB_EHCI_OMAP
 	ehci_clocks_enable();
 #endif
+#ifdef CONFIG_BEAGLEXM
+	_main();	
+#endif
 }
 
 #ifdef CONFIG_SPL_BUILD
+/*@ terminates \false;
+  @ ensures \false;
+*/
 void board_init_f(ulong dummy)
 {
 	mem_init();
+#ifdef CONFIG_BEAGLEXM
+	_main_finish();
+#endif
 }
 #endif
-
 /*
  * Routine: misc_init_r
  * Description: A basic misc_init_r that just displays the die ID
@@ -226,6 +243,7 @@ int __weak misc_init_r(void)
 static void wait_for_command_complete(struct watchdog *wd_base)
 {
 	int pending = 1;
+	//@ loop pragma UNROLL 0;  	
 	do {
 		pending = readl(&wd_base->wwps);
 	} while (pending);

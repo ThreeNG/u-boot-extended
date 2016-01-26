@@ -9,7 +9,7 @@
 #include <trace.h>
 #include <asm/io.h>
 #include <asm/sections.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static char trace_enabled __attribute__((section(".data")));

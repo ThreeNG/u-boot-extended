@@ -12,7 +12,6 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <regmap.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 int regmap_init_mem(struct udevice *dev, struct regmap **mapp)

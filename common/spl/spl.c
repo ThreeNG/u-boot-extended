@@ -19,6 +19,10 @@
 #include <dm/root.h>
 #include <linux/compiler.h>
 
+#ifdef CONFIG_BEAGLEXM
+void __noreturn spl_after_load_image(int i);
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifndef CONFIG_SYS_UBOOT_START
@@ -63,7 +67,7 @@ __weak void spl_board_prepare_for_linux(void)
 {
 	/* Nothing to do! */
 }
-
+#ifndef CONFIG_MIN_BOOT
 void spl_set_header_raw_uboot(void)
 {
 	spl_image.size = CONFIG_SYS_MONITOR_LEN;
@@ -72,6 +76,7 @@ void spl_set_header_raw_uboot(void)
 	spl_image.os = IH_OS_U_BOOT;
 	spl_image.name = "U-Boot";
 }
+#endif
 
 void spl_parse_image_header(const struct image_header *header)
 {
@@ -96,7 +101,7 @@ void spl_parse_image_header(const struct image_header *header)
 				header_size;
 		}
 		spl_image.os = image_get_os(header);
-		spl_image.name = image_get_name(header);
+		spl_image.name = image_get_name(header);		
 		debug("spl: payload image: %.*s load addr: 0x%x size: %d\n",
 			(int)sizeof(spl_image.name), spl_image.name,
 			spl_image.load_addr, spl_image.size);
@@ -114,12 +119,15 @@ void spl_parse_image_header(const struct image_header *header)
 #else
 		/* Signature not found - assume u-boot.bin */
 		debug("mkimage signature not found - ih_magic = %x\n",
-			header->ih_magic);
+			header->ih_magic);	      
 		spl_set_header_raw_uboot();
 #endif
 	}
 }
 
+/*@ terminates \false;
+  ensures \false;
+*/
 __weak void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
 	typedef void __noreturn (*image_entry_noargs_t)(void);
@@ -266,7 +274,6 @@ static void announce_boot_device(u32 boot_device)
 		if (boot_name_table[i].boot_dev == boot_device)
 			break;
 	}
-
 	printf("%s\n", boot_name_table[i].name);
 }
 #else
@@ -292,7 +299,7 @@ static int spl_load_image(u32 boot_device)
 #endif
 #ifdef CONFIG_SPL_ONENAND_SUPPORT
 	case BOOT_DEVICE_ONENAND:
-		return spl_onenand_load_image();
+		return spl_onenand_loadimage();
 #endif
 #ifdef CONFIG_SPL_NOR_SUPPORT
 	case BOOT_DEVICE_NOR:
@@ -303,14 +310,14 @@ static int spl_load_image(u32 boot_device)
 		return spl_ymodem_load_image();
 #endif
 #ifdef CONFIG_SPL_SPI_SUPPORT
-	case BOOT_DEVICE_SPI:
+	case BOOT_DEVICE_SPI:	
 		return spl_spi_load_image();
 #endif
 #ifdef CONFIG_SPL_ETH_SUPPORT
 	case BOOT_DEVICE_CPGMAC:
-#ifdef CONFIG_SPL_ETH_DEVICE
+#ifdef CONFIG_SPL_ETH_DEVICE	
 		return spl_net_load_image(CONFIG_SPL_ETH_DEVICE);
-#else
+#else	
 		return spl_net_load_image(NULL);
 #endif
 #endif
@@ -340,10 +347,13 @@ static int spl_load_image(u32 boot_device)
 	return -EINVAL;
 }
 
+#define ___FRAMAC_board_init_spl_SAMPLE_ENTRYPOINT
+/*@ terminates \false;
+  ensures \false;
+*/
 void board_init_r(gd_t *dummy1, ulong dummy2)
 {
 	int i;
-
 	debug(">>spl:board_init_r()\n");
 
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
@@ -374,7 +384,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		if (!spl_load_image(spl_boot_list[i]))
 			break;
 	}
-
+#ifndef CONFIG_BEAGLEXM 
 	if (i == ARRAY_SIZE(spl_boot_list) ||
 	    spl_boot_list[i] == BOOT_DEVICE_NONE) {
 		puts("SPL: failed to boot from all boot devices\n");
@@ -386,11 +396,13 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		debug("Jumping to U-Boot\n");
 		break;
 #ifdef CONFIG_SPL_OS_BOOT
+#ifndef CONFIG_MIN_BOOT
 	case IH_OS_LINUX:
 		debug("Jumping to Linux\n");
 		spl_board_prepare_for_linux();
 		jump_to_image_linux((void *)CONFIG_SYS_SPL_ARGS_ADDR);
 #endif
+#endif		
 	default:
 		debug("Unsupported OS image.. Jumping nevertheless..\n");
 	}
@@ -398,11 +410,46 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	debug("SPL malloc() used %#lx bytes (%ld KB)\n", gd->malloc_ptr,
 	      gd->malloc_ptr / 1024);
 #endif
-
 	debug("loaded - jumping to U-Boot...");
 	jump_to_image_no_args(&spl_image);
 }
+#else
+spl_after_load_image(i);
+}
+/*@ terminates \false;
+  ensures \false;
+*/
+void __noreturn spl_after_load_image(int i)
+{
+	if (i == ARRAY_SIZE(spl_boot_list) ||
+	    spl_boot_list[i] == BOOT_DEVICE_NONE) {
+		puts("SPL: failed to boot from all boot devices\n");
+		hang();
+	}
 
+	switch (spl_image.os) {
+	case IH_OS_U_BOOT:
+		debug("Jumping to U-Boot\n");
+		break;
+#ifdef CONFIG_SPL_OS_BOOT
+#ifndef CONFIG_MIN_BOOT
+	case IH_OS_LINUX:
+		debug("Jumping to Linux\n");
+		spl_board_prepare_for_linux();
+		jump_to_image_linux((void *)CONFIG_SYS_SPL_ARGS_ADDR);
+#endif
+#endif		
+	default:
+		debug("Unsupported OS image.. Jumping nevertheless..\n");
+	}
+#if defined(CONFIG_SYS_MALLOC_F_LEN) && !defined(CONFIG_SYS_SPL_MALLOC_SIZE)
+	debug("SPL malloc() used %#lx bytes (%ld KB)\n", gd->malloc_ptr,
+	      gd->malloc_ptr / 1024);
+#endif
+	debug("loaded - jumping to U-Boot...");
+	jump_to_image_no_args(&spl_image);
+}
+#endif
 /*
  * This requires UART clocks to be enabled.  In order for this to work the
  * caller must ensure that the gd pointer is valid.
@@ -418,7 +465,7 @@ void preloader_console_init(void)
 
 	puts("\nU-Boot SPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 			U_BOOT_TIME ")\n");
-#ifdef CONFIG_SPL_DISPLAY_PRINT
+#ifdef CONFIG_SPL_DISPLAY_PRINT	
 	spl_display_print();
 #endif
 }
@@ -447,8 +494,8 @@ ulong spl_relocate_stack_gd(void)
 	ptr &= ~7;
 	new_gd = (gd_t *)ptr;
 	memcpy(new_gd, (void *)gd, sizeof(gd_t));
+#define ___FRAMAC_update_gd_spl_PATCH	
 	gd = new_gd;
-
 #ifdef CONFIG_SPL_SYS_MALLOC_SIMPLE
 	if (CONFIG_SPL_STACK_R_MALLOC_SIMPLE_LEN) {
 		if (!(gd->flags & GD_FLG_SPL_INIT))

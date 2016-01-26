@@ -7,7 +7,6 @@
 #include <common.h>
 #include <dm.h>
 #include <dm/root.h>
-
 DECLARE_GLOBAL_DATA_PTR;
 
 struct simple_bus_plat {

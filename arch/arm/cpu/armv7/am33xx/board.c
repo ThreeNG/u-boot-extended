@@ -91,6 +91,7 @@ U_BOOT_DEVICES(am33xx_gpios) = {
 #endif
 
 #ifndef CONFIG_DM_GPIO
+#define ___FRAMAC_gpio_bank_spl_PATCH
 static const struct gpio_bank gpio_bank_am33xx[] = {
 	{ (void *)AM33XX_GPIO0_BASE },
 	{ (void *)AM33XX_GPIO1_BASE },

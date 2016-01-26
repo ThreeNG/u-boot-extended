@@ -10,6 +10,7 @@
 #else
 #include <common.h>
 #include <malloc.h>
+
 DECLARE_GLOBAL_DATA_PTR;
 #endif /* !USE_HOSTCC*/
 #include <image.h>

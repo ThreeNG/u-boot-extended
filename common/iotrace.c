@@ -9,7 +9,7 @@
 #include <common.h>
 #include <mapmem.h>
 #include <asm/io.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /* Support up to the machine word length for now */

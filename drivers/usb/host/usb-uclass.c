@@ -563,6 +563,7 @@ int usb_scan_device(struct udevice *parent, int port,
 	struct usb_bus_priv *priv;
 	struct usb_device *parent_udev;
 	int ret;
+
 	ALLOC_CACHE_ALIGN_BUFFER(struct usb_device, udev, 1);
 	struct usb_interface_descriptor *iface = &udev->config.if_desc[0].desc;
 

@@ -9,6 +9,11 @@
 
 #include <common.h>
 
+#ifdef CONFIG_BEAGLEXM
+ulong board_init_f_mem_finish(ulong top);
+#endif
+
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /*
@@ -25,10 +30,13 @@ DECLARE_GLOBAL_DATA_PTR;
 #ifndef CONFIG_X86
 __weak void arch_setup_gd(struct global_data *gd_ptr)
 {
+#define ___FRAMAC_update_gd_ptr_spl_PATCH  
 	gd = gd_ptr;
 }
 #endif /* !CONFIG_X86 */
-
+/*@ terminates \false;
+  @ ensures \false;
+*/
 ulong board_init_f_mem(ulong top)
 {
 	struct global_data *gd_ptr;
@@ -48,12 +56,17 @@ ulong board_init_f_mem(ulong top)
 	for (ptr = (int *)gd_ptr; ptr < (int *)(gd_ptr + 1); )
 		*ptr++ = 0;
 #endif
+
 	arch_setup_gd(gd_ptr);
 
 #if defined(CONFIG_SYS_MALLOC_F)
 	top -= CONFIG_SYS_MALLOC_F_LEN;
+#define ___FRAMAC_gd_to_gdptr_spl_PATCH	
 	gd->malloc_base = top;
 #endif
-
+#ifdef CONFIG_BEAGLEXM
+	return board_init_f_mem_finish(top);
+#else
 	return top;
+#endif	
 }

@@ -15,7 +15,7 @@
 #include <search.h>
 #include <errno.h>
 #include <malloc.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /************************************************************************

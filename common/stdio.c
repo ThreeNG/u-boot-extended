@@ -26,7 +26,7 @@
 #endif
 
 #include <dm/device-internal.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct stdio_dev devs;

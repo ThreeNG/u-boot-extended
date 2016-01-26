@@ -12,7 +12,7 @@
 #include <cli.h>
 #include <console.h>
 #include <version.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 /*

@@ -37,7 +37,7 @@
 #include <linux/stddef.h>
 #include <asm/byteorder.h>
 #include <asm/io.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #if	!defined(CONFIG_ENV_IS_IN_EEPROM)	&& \
@@ -261,7 +261,7 @@ static int _do_env_set(int flag, int argc, char * const argv[], int env_flag)
 	}
 	for (i = 2, s = value; i < argc; ++i) {
 		char *v = argv[i];
-
+#define ___LONGWRITE__do_env_set_main_BREAK
 		while ((*s++ = *v++) != '\0')
 			;
 		*(s - 1) = ' ';

@@ -49,6 +49,8 @@ u32 is_mem_sdr(void)
  *   command line mem=xyz use all memory with out discontinuous support
  *   compiled in.  We could do it in the ATAG, but there really is two banks...
  */
+#define ___SKIP_make_cs1_contiguous_spl_FUNC
+#define ___SKIP_make_cs1_contiguous_main_FUNC
 void make_cs1_contiguous(void)
 {
 	u32 size, a_add_low, a_add_high;
@@ -66,6 +68,8 @@ void make_cs1_contiguous(void)
  * get_sdr_cs_size -
  *  - Get size of chip select 0/1
  */
+#define ___SKIP_get_sdr_cs_size_spl_FUNC
+#define ___SKIP_get_sdr_cs_size_main_FUNC
 u32 get_sdr_cs_size(u32 cs)
 {
 	u32 size;
@@ -87,10 +91,13 @@ u32 get_sdr_cs_offset(u32 cs)
 
 	if (!cs)
 		return 0;
-
+#define ___SKIP_get_sdr_cs_offset_spl_START
+#define ___SKIP_get_sdr_cs_offset_main_START
 	offset = readl(&sdrc_base->cs_cfg);
 	offset = (offset & 15) << 27 | (offset & 0x300) << 17;
-
+#define ___SKIP_get_sdr_cs_offset_spl_END
+#define ___SKIP_get_sdr_cs_offset_main_END
+#define ___FRAMAC_sdr_cs_offset_spl_PATCH	
 	return offset;
 }
 
@@ -103,7 +110,9 @@ static void write_sdrc_timings(u32 cs, struct sdrc_actim *sdrc_actim_base,
 			struct board_sdrc_timings *timings)
 {
 	/* Setup timings we got from the board. */
-	writel(timings->mcfg, &sdrc_base->cs[cs].mcfg);
+#define ___SKIP_write_sdrc_timings0_spl_START
+#define ___SKIP_write_sdrc_timings0_main_START  
+        writel(timings->mcfg, &sdrc_base->cs[cs].mcfg);
 	writel(timings->ctrla, &sdrc_actim_base->ctrla);
 	writel(timings->ctrlb, &sdrc_actim_base->ctrlb);
 	writel(timings->rfr_ctrl, &sdrc_base->cs[cs].rfr_ctrl);
@@ -112,12 +121,16 @@ static void write_sdrc_timings(u32 cs, struct sdrc_actim *sdrc_actim_base,
 	writel(CMD_AUTOREFRESH, &sdrc_base->cs[cs].manual);
 	writel(CMD_AUTOREFRESH, &sdrc_base->cs[cs].manual);
 	writel(timings->mr, &sdrc_base->cs[cs].mr);
+#define ___SKIP_write_sdrc_timings0_spl_END
+#define ___SKIP_write_sdrc_timings0_main_END
 
 	/*
 	 * Test ram in this bank
 	 * Disable if bad or not present
 	 */
 	if (!mem_ok(cs))
+#define ___SKIP_write_sdrc_timings1_spl_NEXT
+#define ___SKIP_write_sdrc_timings1_main_NEXT
 		writel(0, &sdrc_base->cs[cs].mcfg);
 }
 
@@ -153,20 +166,28 @@ void do_sdrc_init(u32 cs, u32 early)
 #endif
 	if (early) {
 		/* reset sdrc controller */
+#define ___SKIP_do_sdrc_init0_spl_NEXT
+#define ___SKIP_do_sdrc_init0_main_NEXT
 		writel(SOFTRESET, &sdrc_base->sysconfig);
 		wait_on_value(RESETDONE, RESETDONE, &sdrc_base->status,
 				12000000);
+#define ___SKIP_do_sdrc_init1_spl_NEXT
+#define ___SKIP_do_sdrc_init1_main_NEXT
 		writel(0, &sdrc_base->sysconfig);
 
 		/* setup sdrc to ball mux */
 		writel(timings.sharing, &sdrc_base->sharing);
 
 		/* Disable Power Down of CKE because of 1 CKE on combo part */
+#define ___SKIP_do_sdrc_init2_main_START
+#define ___SKIP_do_sdrc_init2_spl_START				
 		writel(WAKEUPPROC | SRFRONRESET | PAGEPOLICY_HIGH,
 				&sdrc_base->power);
 
 		writel(ENADLL | DLLPHASE_90, &sdrc_base->dlla_ctrl);
 		sdelay(0x20000);
+#define ___SKIP_do_sdrc_init2_main_END
+#define ___SKIP_do_sdrc_init2_spl_END		
 #ifdef CONFIG_SPL_BUILD
 		write_sdrc_timings(CS0, sdrc_actim_base0, &timings);
 		make_cs1_contiguous();
@@ -182,11 +203,16 @@ void do_sdrc_init(u32 cs, u32 early)
 	 * so we may be asked now to setup CS1.
 	 */
 	if (cs == CS1) {
+#define ___SKIP_do_sdrc_init3_spl_START
+#define ___SKIP_do_sdrc_init3_main_START
+	  
 		timings.mcfg = readl(&sdrc_base->cs[CS0].mcfg),
 		timings.rfr_ctrl = readl(&sdrc_base->cs[CS0].rfr_ctrl);
 		timings.ctrla = readl(&sdrc_actim_base0->ctrla);
 		timings.ctrlb = readl(&sdrc_actim_base0->ctrlb);
 		timings.mr = readl(&sdrc_base->cs[CS0].mr);
+#define ___SKIP_do_sdrc_init3_spl_END
+#define ___SKIP_do_sdrc_init3_main_END		
 		write_sdrc_timings(cs, sdrc_actim_base1, &timings);
 	}
 }
@@ -234,6 +260,7 @@ void dram_init_banksize (void)
  *  - Init the sdrc chip,
  *  - Selects CS0 and CS1,
  */
+#define ___FRAMAC_mem_init_spl_SAMPLE_ENTRYPOINT
 void mem_init(void)
 {
 	/* only init up first bank here */

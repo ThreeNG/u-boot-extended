@@ -12,7 +12,7 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 #include <common.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 int arch_reserve_stacks(void)

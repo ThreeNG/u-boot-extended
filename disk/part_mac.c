@@ -40,8 +40,8 @@ static int part_mac_read_pdb (block_dev_desc_t *dev_desc, int part, mac_partitio
  */
 int test_part_mac (block_dev_desc_t *dev_desc)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(mac_driver_desc_t, ddesc, 1);
-	ALLOC_CACHE_ALIGN_BUFFER(mac_partition_t, mpart, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(mac_driver_desc_t, ddesc, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(mac_partition_t, mpart, 1);
 	ulong i, n;
 
 	if (part_mac_read_ddb (dev_desc, ddesc)) {
@@ -211,8 +211,8 @@ static int part_mac_read_pdb (block_dev_desc_t *dev_desc, int part, mac_partitio
 
 int get_partition_info_mac (block_dev_desc_t *dev_desc, int part, disk_partition_t *info)
 {
-	ALLOC_CACHE_ALIGN_BUFFER(mac_driver_desc_t, ddesc, 1);
-	ALLOC_CACHE_ALIGN_BUFFER(mac_partition_t, mpart, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(mac_driver_desc_t, ddesc, 1);
+  ALLOC_CACHE_ALIGN_BUFFER(mac_partition_t, mpart, 1);
 
 	if (part_mac_read_ddb (dev_desc, ddesc)) {
 		return (-1);

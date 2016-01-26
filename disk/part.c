@@ -54,7 +54,7 @@ static const struct block_drvr block_drvr[] = {
 #endif
 	{ },
 };
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef HAVE_BLOCK_DEVICE
@@ -158,7 +158,7 @@ void dev_print (block_dev_desc_t *dev_desc)
 		printf ("(%d:%d) Vendor: %s Prod.: %s Rev: %s\n",
 			dev_desc->target,dev_desc->lun,
 			dev_desc->vendor,
-			dev_desc->product,
+			dev_desc->product,	
 			dev_desc->revision);
 		break;
 	case IF_TYPE_ATAPI:
@@ -166,7 +166,7 @@ void dev_print (block_dev_desc_t *dev_desc)
 	case IF_TYPE_SATA:
 		printf ("Model: %s Firm: %s Ser#: %s\n",
 			dev_desc->vendor,
-			dev_desc->revision,
+			dev_desc->revision,	
 			dev_desc->product);
 		break;
 	case IF_TYPE_SD:
@@ -395,7 +395,7 @@ int get_partition_info(block_dev_desc_t *dev_desc, int part,
 #ifdef CONFIG_PARTITION_TYPE_GUID
 	info->type_guid[0] = 0;
 #endif
-
+	//@ assert \initialized(&dev_desc->part_type);
 	switch (dev_desc->part_type) {
 #ifdef CONFIG_MAC_PARTITION
 	case PART_TYPE_MAC:

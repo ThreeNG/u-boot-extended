@@ -15,7 +15,7 @@
 #include <asm/arch/mem.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/emif4.h>
-
+#define ___FRAMAC_GD_spl_PATCH
 DECLARE_GLOBAL_DATA_PTR;
 extern omap3_sysinfo sysinfo;
 

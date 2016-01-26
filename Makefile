@@ -557,9 +557,9 @@ include/config/auto.conf: ;
 endif # $(dot-config)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= -Os
+KBUILD_CFLAGS	+= -Og
 else
-KBUILD_CFLAGS	+= -O2
+KBUILD_CFLAGS	+=
 endif
 
 ifdef BUILD_TAG
@@ -569,10 +569,10 @@ endif
 KBUILD_CFLAGS += $(call cc-option,-fno-stack-protector)
 KBUILD_CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
 
-KBUILD_CFLAGS	+= -g
+KBUILD_CFLAGS	+= -g3
 # $(KBUILD_AFLAGS) sets -g, which causes gcc to pass a suitable -g<format>
 # option to the assembler.
-KBUILD_AFLAGS	+= -g
+KBUILD_AFLAGS	+= -g3 # --save-temps
 
 # Report stack usage if supported
 ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-stack-usage.sh $(CC)),y)
@@ -1328,7 +1328,7 @@ spl/u-boot-spl.bin: spl/u-boot-spl
 	@:
 spl/u-boot-spl: tools prepare $(if $(CONFIG_OF_SEPARATE),dts/dt.dtb)
 	$(Q)$(MAKE) obj=spl -f $(srctree)/scripts/Makefile.spl all
-
+	$(Q)$(MAKE) obj=spl -f $(srctree)/scripts/Makefile.spl frama_c_tweaks.i
 spl/sunxi-spl.bin: spl/u-boot-spl
 	@:
 

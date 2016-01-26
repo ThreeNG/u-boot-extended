@@ -53,6 +53,8 @@ DECLARE_GLOBAL_DATA_PTR;
 /* Absolutely safe for status update at 100 kHz I2C: */
 #define I2C_WAIT	200
 
+
+
 static int wait_for_bb(struct i2c_adapter *adap);
 static struct i2c *omap24_get_base(struct i2c_adapter *adap);
 static u16 wait_for_event(struct i2c_adapter *adap);
@@ -68,6 +70,7 @@ static int omap24_i2c_findpsc(u32 *pscl, u32 *psch, uint speed)
 	 * some divisors may cause a precission loss, but shouldn't
 	 * be a big thing, because i2c_clk is then allready very slow.
 	 */
+	//@ loop pragma UNROLL 1;
 	while (prescaler <= 0xFF) {
 		sampleclk = I2C_IP_CLK / (prescaler+1);
 
@@ -90,13 +93,35 @@ static int omap24_i2c_findpsc(u32 *pscl, u32 *psch, uint speed)
 	}
 	return -1;
 }
+
+/* assigns (struct i2c *) *i2c_base \from omap24_get_base(adap);
+   assigns adap->speed \from speed;
+   assigns adap->waitdelay \from  (10000000 / speed) * 2;
+   assigns *(i2c_base->con) \from 0xBEEF;
+   assigns *(i2c_base->psc) \from psc;
+   assigns *(i2c_base->scll) \from 0xBEEF;
+   assigns *(i2c_base->sclh) \from 0xBEEF;
+   assigns *(i2c_base->con) \from I2C_CON_EN;
+   assigns *(i2c_base->stat) \from 0xFFFF;
+  */
 static uint omap24_i2c_setspeed(struct i2c_adapter *adap, uint speed)
 {
 	struct i2c *i2c_base = omap24_get_base(adap);
 	int psc, fsscll = 0, fssclh = 0;
 	int hsscll = 0, hssclh = 0;
 	u32 scll = 0, sclh = 0;
-
+	// need to define i2c_base->stat as volatile
+	/* ghost // requires p == &i2c_base->stat;
+	   unsigned int read_i2c_stat(volatile unsigned int *p) {
+	     if (p == &i2c_base->stat) {
+	       return (1 << 3);
+	     } else {
+	       return *p;
+	     }
+	   )
+	*/
+	
+	// volatile &i2c_base->stat reads read_i2c_stat;
 	if (speed >= OMAP_I2C_HIGH_SPEED) {
 		/* High speed */
 		psc = I2C_IP_CLK / I2C_INTERNAL_SAMPLING_CLK;
@@ -177,6 +202,7 @@ static void omap24_i2c_deblock(struct i2c_adapter *adap)
 	udelay(10);
 
 	/* toggle scl 9 clocks */
+	//@ loop pragma UNROLL 9;	
 	for (i = 0; i < 9; i++) {
 		/* SCL = 0 */
 		systest &= ~I2C_SYSTEST_SCL_O;
@@ -216,6 +242,7 @@ retry:
 	udelay(1000);
 
 	writew(I2C_CON_EN, &i2c_base->con);
+	//@ loop pragma UNROLL 1;	
 	while (!(readw(&i2c_base->syss) & I2C_SYSS_RDONE) && timeout--) {
 		if (timeout <= 0) {
 			puts("ERROR: Timeout in soft-reset\n");
@@ -253,6 +280,10 @@ retry:
 		}
 }
 
+/* assigns struct i2c *i2c_base \from omap24_get_base(adap);
+   assigns *(i2c_base->stat) \from I2C_STAT_RRDY;
+  */
+// assigns &(omap24_get_base(adap)->stat) \from I2C_STAT_RRDY;
 static void flush_fifo(struct i2c_adapter *adap)
 {
 	struct i2c *i2c_base = omap24_get_base(adap);
@@ -260,8 +291,9 @@ static void flush_fifo(struct i2c_adapter *adap)
 
 	/*
 	 * note: if you try and read data when its not there or ready
-	 * you get a bus error
-	 */
+	 * you get a bus error	 */	
+
+	//@ loop pragma UNROLL 1;
 	while (1) {
 		stat = readw(&i2c_base->stat);
 		if (stat == I2C_STAT_RRDY) {
@@ -295,7 +327,6 @@ static int omap24_i2c_probe(struct i2c_adapter *adap, uchar chip)
 	/* Stop bit needed here */
 	writew(I2C_CON_EN | I2C_CON_MST | I2C_CON_STT | I2C_CON_TRX |
 	       I2C_CON_STP, &i2c_base->con);
-
 	status = wait_for_event(adap);
 
 	if ((status & ~I2C_STAT_XRDY) == 0 || (status & I2C_STAT_AL)) {
@@ -392,6 +423,7 @@ static int omap24_i2c_read(struct i2c_adapter *adap, uchar chip, uint addr,
 		       I2C_CON_TRX, &i2c_base->con);
 #endif
 		/* Send register offset */
+		//@ loop pragma UNROLL 1;		
 		while (1) {
 			status = wait_for_event(adap);
 			/* Try to identify bus that is not padconf'd for I2C */
@@ -432,6 +464,7 @@ static int omap24_i2c_read(struct i2c_adapter *adap, uchar chip, uint addr,
 	       &i2c_base->con);
 
 	/* Receive data */
+	//@ loop pragma UNROLL 1;	
 	while (1) {
 		status = wait_for_event(adap);
 		/*
@@ -512,21 +545,19 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 	/* Stop bit needed here */
 	writew(I2C_CON_EN | I2C_CON_MST | I2C_CON_STT | I2C_CON_TRX |
 	       I2C_CON_STP, &i2c_base->con);
-
+	//@ loop pragma UNROLL alen;
 	while (alen) {
 		/* Must write reg offset (one or two bytes) */
 		status = wait_for_event(adap);
 		/* Try to identify bus that is not padconf'd for I2C */
 		if (status == I2C_STAT_XRDY) {
 			i2c_error = 2;
-			printf("i2c_write: pads on bus %d probably not configured (status=0x%x)\n",
-			       adap->hwadapnr, status);
+			printf("i2c_write: pads on bus %d probably not configured (status=0x%x)\n", adap->hwadapnr, status);
 			goto wr_exit;
 		}
 		if (status == 0 || (status & I2C_STAT_NACK)) {
 			i2c_error = 1;
-			printf("i2c_write: error waiting for addr ACK (status=0x%x)\n",
-			       status);
+			printf("i2c_write: error waiting for addr ACK (status=0x%x)\n", status);
 			goto wr_exit;
 		}
 		if (status & I2C_STAT_XRDY) {
@@ -535,8 +566,7 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 			writew(I2C_STAT_XRDY, &i2c_base->stat);
 		} else {
 			i2c_error = 1;
-			printf("i2c_write: bus not ready for addr Tx (status=0x%x)\n",
-			       status);
+			printf("i2c_write: bus not ready for addr Tx (status=0x%x)\n", status);
 			goto wr_exit;
 		}
 	}
@@ -545,8 +575,7 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 		status = wait_for_event(adap);
 		if (status == 0 || (status & I2C_STAT_NACK)) {
 			i2c_error = 1;
-			printf("i2c_write: error waiting for data ACK (status=0x%x)\n",
-			       status);
+			printf("i2c_write: error waiting for data ACK (status=0x%x)\n", status);
 			goto wr_exit;
 		}
 		if (status & I2C_STAT_XRDY) {
@@ -554,8 +583,7 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 			writew(I2C_STAT_XRDY, &i2c_base->stat);
 		} else {
 			i2c_error = 1;
-			printf("i2c_write: bus not ready for data Tx (i=%d)\n",
-			       i);
+			printf("i2c_write: bus not ready for data Tx (i=%d)\n", i);
 			goto wr_exit;
 		}
 	}
@@ -563,7 +591,8 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 	 * poll ARDY bit for making sure that last byte really has been
 	 * transferred on the bus.
 	 */
-	do {
+	//@ loop pragma UNROLL 1;	
+	do {	
 		status = wait_for_event(adap);
 	} while (!(status & I2C_STAT_ARDY) && timeout--);
 	if (timeout <= 0)
@@ -579,17 +608,27 @@ wr_exit:
  * Wait for the bus to be free by checking the Bus Busy (BB)
  * bit to become clear
  */
+/* assigns  *(i2c_base->stat) \from 0xFFFF;
+   assigns  *(i2c_base->stat) \from stat;
+
+  */
+// ghost int igh = 0;
+/*  assigns \result \from igh;
+   ensures \result == 0;
+  */
 static int wait_for_bb(struct i2c_adapter *adap)
 {
 	struct i2c *i2c_base = omap24_get_base(adap);
 	int timeout = I2C_TIMEOUT;
 	u16 stat;
-
 	writew(0xFFFF, &i2c_base->stat);	/* clear current interrupts...*/
 #if defined(CONFIG_OMAP243X) || defined(CONFIG_OMAP34XX)
+	//@ loop pragma UNROLL 1;	
 	while ((stat = readw(&i2c_base->stat) & I2C_STAT_BB) && timeout--) {
 #else
 	/* Read RAW status */
+
+	//@ loop pragma UNROLL 1;
 	while ((stat = readw(&i2c_base->irqstatus_raw) &
 		I2C_STAT_BB) && timeout--) {
 #endif
@@ -610,12 +649,18 @@ static int wait_for_bb(struct i2c_adapter *adap)
  * Wait for the I2C controller to complete current action
  * and update status
  */
+
+
+/* assigns \result \from igh;
+   ensures 0 == \result || \result == 4 || \result == 1;
+ */
 static u16 wait_for_event(struct i2c_adapter *adap)
 {
 	struct i2c *i2c_base = omap24_get_base(adap);
 	u16 status;
 	int timeout = I2C_TIMEOUT;
-
+	// volatile &i2c_base->stat reads read_i2c_stat	
+	//@ loop pragma UNROLL 1;
 	do {
 		udelay(adap->waitdelay);
 #if defined(CONFIG_OMAP243X) || defined(CONFIG_OMAP34XX)
@@ -624,10 +669,7 @@ static u16 wait_for_event(struct i2c_adapter *adap)
 		/* Read RAW status */
 		status = readw(&i2c_base->irqstatus_raw);
 #endif
-	} while (!(status &
-		   (I2C_STAT_ROVR | I2C_STAT_XUDF | I2C_STAT_XRDY |
-		    I2C_STAT_RRDY | I2C_STAT_ARDY | I2C_STAT_NACK |
-		    I2C_STAT_AL)) && timeout--);
+	} while (!(status & (I2C_STAT_ROVR | I2C_STAT_XUDF | I2C_STAT_XRDY | I2C_STAT_RRDY | I2C_STAT_ARDY | I2C_STAT_NACK | I2C_STAT_AL)) && timeout--);
 
 	if (timeout <= 0) {
 		printf("Timed out in wait_for_event: status=%04x\n",

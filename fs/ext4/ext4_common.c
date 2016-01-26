@@ -18,7 +18,6 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
-
 #include <common.h>
 #include <ext_common.h>
 #include <ext4fs.h>

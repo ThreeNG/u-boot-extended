@@ -52,6 +52,12 @@ config CC_OPTIMIZE_FOR_SIZE
 
 	  This option is enabled by default for U-Boot.
 
+config VALIDATE
+       bool "Inject validation routines"
+       default n
+       help
+         Help is not here yet
+	 
 config SYS_MALLOC_F
 	bool "Enable malloc() pool before relocation"
 	default y if DM
@@ -235,3 +241,6 @@ source "fs/Kconfig"
 source "lib/Kconfig"
 
 source "test/Kconfig"
+
+config BEAGLEXM
+	bool "TI OMAP3 BeagleBoard-XM"
