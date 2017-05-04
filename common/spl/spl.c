@@ -136,6 +136,7 @@ __weak void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 		(image_entry_noargs_t)(unsigned long)spl_image->entry_point;
 
 	debug("image entry point: 0x%X\n", spl_image->entry_point);
+#define ___STAGEINFO_success_spl_EXIT
 	image_entry();
 }
 

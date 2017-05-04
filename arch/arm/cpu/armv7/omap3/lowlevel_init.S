@@ -55,9 +55,9 @@ next2:
 	cmp	r0, r2			/* until source end address [r2] */
 	blo	next2
 
-#define ___RELOC_clk_code_spl_READY
-#define ___RELOC_clk_code_main_READY
 #ifdef CONFIG_BEAGLEXM
+#define ___RELOC_clk_code_spl_READY
+#define ___RELOC_clk_code_main_READY	
 	b lowlevel_init_finish			/* start of nex stage */
 #endif
 	mov	pc, lr			/* back to caller */
