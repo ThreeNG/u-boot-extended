@@ -2806,64 +2806,42 @@ Void_t* mEMALIGn(alignment, bytes) size_t alignment; size_t bytes;
 {
 #define ___FRAMAC_memalign_spl_PATCH
   ;
-#define ___FRAMAC_delete_line_spl_PATCH  
   INTERNAL_SIZE_T    nb;      /* padded  request size */
-#define ___FRAMAC_delete_line_spl_PATCH  
   char*     m;                /* memory returned by malloc call */
-#define ___FRAMAC_delete_line_spl_PATCH  
   mchunkptr p;                /* corresponding chunk */
-#define ___FRAMAC_delete_line_spl_PATCH
-#define ___FRAMAC_align_decl_spl_PATCH
   char*     brk;              /* alignment point within p */
-#define ___FRAMAC_delete_line_spl_PATCH  
   mchunkptr newp;             /* chunk to return */
-#define ___FRAMAC_delete_line_spl_PATCH  
   INTERNAL_SIZE_T  newsize;   /* its size */
-#define ___FRAMAC_delete_line_spl_PATCH  
   INTERNAL_SIZE_T  leadsize;  /* leading space befor alignment point */
-#define ___FRAMAC_delete_line_spl_PATCH  
   mchunkptr remainder;        /* spare room at end to split off */
-#define ___FRAMAC_delete_line_spl_PATCH  
   long      remainder_size;   /* its size */
 
-#define ___FRAMAC_delete_line_spl_PATCH  
   if ((long)bytes < 0) return 0;
 
   
   /* If need less alignment than we give anyway, just relay to malloc */
-#define ___FRAMAC_delete_line_spl_PATCH
   if (alignment <= MALLOC_ALIGNMENT) return mALLOc(bytes);
   
 
   /* Otherwise, ensure that it is at least a minimum chunk size */
-#define ___FRAMAC_delete_line_spl_PATCH
   if (alignment <  MINSIZE) alignment = MINSIZE;
   
 
   /* Call malloc with worst case padding to hit alignment. */
-#define ___FRAMAC_delete_line_spl_PATCH  
   nb = request2size(bytes);
-#define ___FRAMAC_delete_line_spl_PATCH  
   m  = (char*)(mALLOc(nb + alignment + MINSIZE));
   
-#define ___FRAMAC_delete_line_spl_PATCH
   if (m == 0) return 0;
   /* propagate failure */
   
-#define ___FRAMAC_delete_line_spl_PATCH
   p = mem2chunk(m);
-#define ___FRAMAC_delete_line_spl_PATCH  
   if ((((unsigned long)(m)) % alignment) == 0) /* aligned */
-#define ___FRAMAC_delete_line_spl_PATCH    
   {
     
 #if HAVE_MMAP
-#define ___FRAMAC_delete_line_spl_PATCH
     if(chunk_is_mmapped(p)) 
-#define ___FRAMAC_delete_line_spl_PATCH     
       return chunk2mem(p); /* nothing more to do */
 #endif
-#define ___FRAMAC_delete_line_spl_PATCH            
   }else{
     /*
       Find an aligned spot inside chunk.
@@ -2873,76 +2851,47 @@ Void_t* mEMALIGn(alignment, bytes) size_t alignment; size_t bytes;
       next aligned spot -- we've allocated enough total room so that
       this is always possible.
     */
-#define ___FRAMAC_delete_line_spl_PATCH    
     brk = (char*)mem2chunk(((unsigned long)(m + alignment - 1)) & -((signed) alignment));
-#define ___FRAMAC_delete_line_spl_PATCH        
     if ((long)(brk - (char*)(p)) < MINSIZE) brk = brk + alignment;
     
-#define ___FRAMAC_delete_line_spl_PATCH    
     newp = (mchunkptr)brk;
-#define ___FRAMAC_delete_line_spl_PATCH        
     leadsize = brk - (char*)(p);
-#define ___FRAMAC_delete_line_spl_PATCH        
     newsize = chunksize(p) - leadsize;
     
 
 #if HAVE_MMAP
-#define ___FRAMAC_delete_line_spl_PATCH        
     if(chunk_is_mmapped(p))
-#define ___FRAMAC_delete_line_spl_PATCH          
     {
-#define ___FRAMAC_delete_line_spl_PATCH          
       newp->prev_size = p->prev_size + leadsize;
-#define ___FRAMAC_delete_line_spl_PATCH          
       set_head(newp, newsize|IS_MMAPPED);
-#define ___FRAMAC_delete_line_spl_PATCH          
       return chunk2mem(newp);
-#define ___FRAMAC_delete_line_spl_PATCH          
     }
     
 #endif
 
     /* give back leader, use the rest */
-#define ___FRAMAC_delete_line_spl_PATCH    
     set_head(newp, newsize | PREV_INUSE);
-#define ___FRAMAC_delete_line_spl_PATCH        
     set_inuse_bit_at_offset(newp, newsize);
-#define ___FRAMAC_delete_line_spl_PATCH        
     set_head_size(p, leadsize);
-#define ___FRAMAC_delete_line_spl_PATCH        
     fREe(chunk2mem(p));
-#define ___FRAMAC_delete_line_spl_PATCH        
     p = newp;
     
-#define ___FRAMAC_delete_line_spl_PATCH    
     assert (newsize >= nb && (((unsigned long)(chunk2mem(p))) % alignment) == 0);
-#define ___FRAMAC_delete_line_spl_PATCH        
   }
   
 
   /* Also give back spare room at the end */
-#define ___FRAMAC_delete_line_spl_PATCH      
   remainder_size = chunksize(p) - nb;
   
-#define ___FRAMAC_delete_line_spl_PATCH    
   if (remainder_size >= (long)MINSIZE)
-#define ___FRAMAC_delete_line_spl_PATCH        
   {
-#define ___FRAMAC_delete_line_spl_PATCH        
     remainder = chunk_at_offset(p, nb);
-#define ___FRAMAC_delete_line_spl_PATCH        
     set_head(remainder, remainder_size | PREV_INUSE);
-#define ___FRAMAC_delete_line_spl_PATCH        
     set_head_size(p, nb);
-#define ___FRAMAC_delete_line_spl_PATCH        
     fREe(chunk2mem(remainder));
-#define ___FRAMAC_delete_line_spl_PATCH        
   }
-#define ___FRAMAC_delete_line_spl_PATCH      
 
-#define ___FRAMAC_delete_line_spl_PATCH      
   check_inuse_chunk(p);
-#define ___FRAMAC_delete_line_spl_PATCH      
   return chunk2mem(p);
   
 
