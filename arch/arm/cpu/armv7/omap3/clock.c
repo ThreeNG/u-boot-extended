@@ -725,6 +725,8 @@ void ehci_clocks_enable(void)
 /******************************************************************************
  * peripheral_enable() - Enable the clks & power for perifs (GPT2, UART1,...)
  *****************************************************************************/
+#define ___SKIP_per_clocks_spl_FUNC
+#define ___SKIP_per_clocks_main_FUNC
 void per_clocks_enable(void)
 {
 #define ___SKIP_per_clocks_enable0_spl_START
