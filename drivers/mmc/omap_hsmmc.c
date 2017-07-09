@@ -326,8 +326,8 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 /* assigns *(mmc_base->stat) =;
   
   */
-#define ___SKIP_mmc_init_stream_spl_START
-#define ___SKIP_mmc_init_stream_main_START  
+#define ___SKIP_mmc_init_stream_spl_FUNC
+#define ___SKIP_mmc_init_stream_main_FUNC
 void mmc_init_stream(struct hsmmc *mmc_base)
 {
 #define ___SKIP_mmc_init_stream0_spl_START
