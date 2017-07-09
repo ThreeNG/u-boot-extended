@@ -339,8 +339,8 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 	writel(readl(&mmc_base->con) | INIT_INITSTREAM, &mmc_base->con);
 
 	writel(MMC_CMD0, &mmc_base->cmd);
-	#define ___SKIP_mmc_init_stream0_spl_END
-	#define ___SKIP_mmc_init_stream0_main_END
+#define ___SKIP_mmc_init_stream0_spl_END
+#define ___SKIP_mmc_init_stream0_main_END
 	start = get_timer(0);
 	//@ loop pragma UNROLL 0;
 	while (!(readl(&mmc_base->stat) & CC_MASK)) {
