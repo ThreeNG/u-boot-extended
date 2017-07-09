@@ -257,7 +257,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 HOSTCC       = cc
 HOSTCXX      = c++
 HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -Og
-HOSTCXXFLAGS = -O2
+HOSTCXXFLAGS = -O2 -Og
 
 ifeq ($(HOSTOS),cygwin)
 HOSTCFLAGS	+= -ansi
