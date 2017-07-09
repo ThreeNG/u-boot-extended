@@ -370,7 +370,8 @@ void mmc_init_stream(struct hsmmc *mmc_base)
 	writel(readl(&mmc_base->con) & ~INIT_INITSTREAM, &mmc_base->con);
 }
 
-
+#define ___SKIP_mmc_init_setup_spl_FUNC
+#define ___SKIP_mmc_init_setup_main_FUNC
 static int omap_hsmmc_init_setup(struct mmc *mmc)
 {
 	struct hsmmc *mmc_base;
