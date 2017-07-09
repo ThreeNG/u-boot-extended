@@ -24,7 +24,8 @@ ENTRY(save_boot_params)
 	b	save_boot_params_ret
 ENDPROC(save_boot_params)
 #endif
-
+#define ___SKIP_omap_smc1_spl_FUNC
+#define ___SKIP_omap_smc1_main_FUNC
 ENTRY(omap_smc1)
 	PUSH	{r4-r12, lr}	@ save registers - ROM code may pollute
 				@ our registers
