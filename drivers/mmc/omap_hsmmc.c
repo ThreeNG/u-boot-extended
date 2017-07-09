@@ -503,6 +503,8 @@ static void mmc_reset_controller_fsm(struct hsmmc *mmc_base, u32 bit)
 	}
 }
 
+#define ___SKIP_omap_hsmmc_send_cmd_spl_FUNC
+#define ___SKIP_omap_hsmmc_send_cmd_main_FUNC
 static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 			struct mmc_data *data)
 {
