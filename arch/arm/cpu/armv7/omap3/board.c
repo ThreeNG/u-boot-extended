@@ -412,6 +412,8 @@ static void omap3_update_aux_cr(u32 set_bits, u32 clear_bits)
 }
 
 /* Invalidate the entire L2 cache from secure mode */
+#define ___SKIP_omap3_invalidate_l2_cache_secure_spl_FUNC
+#define ___SKIP_omap3_invalidate_l2_cache_secure_main_FUNC
 static void omap3_invalidate_l2_cache_secure(void)
 {
 	if (get_device_type() == GP_DEVICE) {
