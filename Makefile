@@ -569,10 +569,10 @@ endif
 KBUILD_CFLAGS += $(call cc-option,-fno-stack-protector)
 KBUILD_CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
 
-KBUILD_CFLAGS	+= -g3
+KBUILD_CFLAGS	+= -g
 # $(KBUILD_AFLAGS) sets -g, which causes gcc to pass a suitable -g<format>
 # option to the assembler.
-KBUILD_AFLAGS	+= -g3 # --save-temps
+KBUILD_AFLAGS	+= -g # --save-temps
 
 # Report stack usage if supported
 ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-stack-usage.sh $(CC)),y)
@@ -584,7 +584,7 @@ KBUILD_CFLAGS += $(call cc-option,-Wno-format-nonliteral)
 # turn jbsr into jsr for m68k
 ifeq ($(ARCH),m68k)
 ifeq ($(findstring 3.4,$(shell $(CC) --version)),3.4)
-KBUILD_AFLAGS += -Wa,-gstabs,-S
+KBUILD_AFLAGS += -Wa,-g,-S
 endif
 endif
 
